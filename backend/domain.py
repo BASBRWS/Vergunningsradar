@@ -43,4 +43,8 @@ def publication_window(day):
 def email_valid(s): return isinstance(s,str) and len(s)<=254 and bool(re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',s))
 def public_lead(l):
     # Een expliciete allowlist voorkomt lekken van bedrijfsnamen en opvolggegevens.
-    return {k:l.get(k) for k in ['id','date','municipality','address','summary','trades','type','sourceUrl']}
+    result={k:l.get(k) for k in ['id','date','municipality','address','summary','trades','type','sourceUrl']}
+    for company in l.get('companies',[]):
+        name=company.get('name','')
+        if name:result['summary']=re.sub(re.escape(name),'[bedrijfsnaam afgeschermd]',result.get('summary',''),flags=re.I)
+    return result

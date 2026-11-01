@@ -9,7 +9,7 @@ BASE='https://api.mollie.com/v2'
 def call(path,method='GET',data=None,key=None):
     secret=os.environ.get('MOLLIE_API_KEY','')
     if not secret:raise ValueError('Mollie is nog niet geconfigureerd.')
-    headers={'Authorization':'Bearer '+secret,'Content-Type':'application/json'}
+    headers={'Authorization':'Bearer '+secret,'Content-Type':'application/json','Accept':'application/json'}
     if key:headers['Idempotency-Key']=key
     raw=fetch(BASE+path,headers=headers,method=method,body=data)
     return json.loads(raw) if raw else {}

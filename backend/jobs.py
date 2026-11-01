@@ -148,6 +148,7 @@ def cleanup():
         for table in ['tokens','sessions','cache','ratelimits']:c.execute('DELETE FROM '+table+' WHERE expires<?',(time.time(),))
         c.execute('DELETE FROM pending WHERE created<=?',((now().date()-timedelta(days=7)).isoformat(),))
         c.execute('DELETE FROM outbox WHERE created<?',(time.time()-30*86400,))
+        c.execute("DELETE FROM optouts WHERE status='unconfirmed' AND substr(created,1,10)<?",((now().date()-timedelta(days=7)).isoformat(),))
         c.execute("DELETE FROM accounts WHERE cancelled_at IS NOT NULL AND substr(cancelled_at,1,10)<?",((now().date()-timedelta(days=365)).isoformat(),))
         c.execute("DELETE FROM accounts WHERE status='trial' AND trial_end<?",((now().date()-timedelta(days=365)).isoformat(),))
         cfg=config(c)

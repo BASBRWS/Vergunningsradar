@@ -22,7 +22,7 @@ De outbox voorkomt dagelijkse dubbele digests na herstart. Bij twijfel of SMTP e
 
 Dagelijkse opschoning verwijdert leads ouder dan 730 dagen, KvK-cache ouder dan 90 dagen, onbekende publicatieverwijzingen vanaf 7 dagen en accounts 365 dagen na opzeggen of het verlopen van een ongebruikt proefaccount. Verouderde KvK-gegevens worden ook uit leads verwijderd; de score wordt dan opnieuw berekend zonder bedrijfspunten. Opvolggegevens, sessies en betalingen worden bij accountverwijdering met foreign keys verwijderd. De gecomprimeerde fiscale boekhouding moet los van de operationele database worden ingericht volgens de toepasselijke bewaarplicht.
 
-Uitgaande mailinhoud wordt na verzending gewist, outboxrecords na 30 dagen. Uitsluitingen blijven bestaan. Onbevestigde uitsluitverzoeken vragen nog een operationele afhandeling, voorkom langdurige ophoping van ongecontroleerde mailadressen. Stel ook voor back-ups dezelfde bewaartermijnen in en herpas opt-outs bij terugzetten.
+Uitgaande mailinhoud wordt na verzending gewist, outboxrecords na 30 dagen. Uitsluitingen blijven bestaan. Onbevestigde uitsluitverzoeken worden na 7 dagen verwijderd. Stel ook voor back-ups dezelfde bewaartermijnen in en herpas opt-outs bij terugzetten.
 
 ## Operationeel
 

@@ -12,7 +12,7 @@ De openbare demo is geen actieve commerciële dienst. Onderstaande serverfunctie
 | F06 | Accountselectie en minimumscore. Alleen accountbeheerder wijzigt de selectie. Gebruiker kan eigen mail aan- en uitzetten. |
 | F07 | SMTP-ochtendmail, maximaal 15 kaarten als leesbare tekstblokken met links. Geen HTML-mailtemplate. Idempotente outbox en afleverregistratie. Geen mail zonder leads. Geen gegarandeerde exact-eenmaalbezorging bij een onzekere SMTP-netwerkfout, die gevallen vereisen controle. |
 | F08 | Zoeken, gemeente, vakgebied, score, status, datum en collega. Clientfilter op geladen leads. |
-| F09 | Bronverwijzing, pandgegevens, bedrijven en peildata. Echte locaties openen in OpenStreetMap. Demo-adressen hebben bewust geen geografische locatie. |
+| F09 | Bronverwijzing, pandgegevens, bedrijven en peildata. Echte locaties kunnen na een klik als kaart worden geladen of in OpenStreetMap worden geopend. Demo-adressen hebben bewust geen geografische locatie. |
 | F10 | Automatisch bekeken, statussen, notities, accountgescheiden opslag. |
 | F11 | Reden en toelichting opgeslagen bij de opvolging. Herijking door beheerder, geen automatische zelflerende score. |
 | F12 | E-maillink, 30 dagen proef, dag-25-herinnering, daarna alleen-lezen. Mollie eerste betaling plus periodiek abonnement, maand/jaar en opzegging. Betaaloverzicht aanwezig; formele fiscale facturen vereisen apart facturatieproces. |

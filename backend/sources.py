@@ -12,14 +12,14 @@ class SourceError(Exception): pass
 class MissingKey(SourceError): pass
 def fetch(url,params=None,headers=None,method='GET',body=None):
     if params: url+='?'+urllib.parse.urlencode(params)
-    h={'User-Agent':'Vergunningradar/0.1 (zakelijke vergunninganalyse)','Accept':'application/json, application/xml;q=0.9',**(headers or {})}
+    h={'User-Agent':'Vergunningradar/0.1 (zakelijke vergunninganalyse)','Accept':'application/xml',**(headers or {})}
     request=urllib.request.Request(url,headers=h,method=method,data=json.dumps(body).encode() if body is not None else None)
     with urllib.request.urlopen(request,timeout=25) as res:
         raw=res.read(8_000_001)
         if len(raw)>8_000_000: raise SourceError('Bronantwoord te groot')
         return raw
 
-def get_json(url,params=None,headers=None): return json.loads(fetch(url,params,headers))
+def get_json(url,params=None,headers=None): return json.loads(fetch(url,params,{'Accept':'application/json',**(headers or {})}))
 def local(tag):return tag.rsplit('}',1)[-1]
 def texts(element,name):return [(el.text or '').strip() for el in element.iter() if local(el.tag)==name and el.text]
 def first(element,name,default=''):return next(iter(texts(element,name)),default)
@@ -36,8 +36,11 @@ def publications(municipality,start,end):
         raw=fetch(SRU,{'version':'2.0','operation':'searchRetrieve','query':query,'startRecord':pos,'maximumRecords':100})
         if b'<!DOCTYPE' in raw or b'<!ENTITY' in raw:raise SourceError('Onveilige XML')
         root=ET.fromstring(raw)
+        if local(root.tag)!='searchRetrieveResponse' or not first(root,'numberOfRecords'):
+            raise SourceError('Geen geldig SRU-antwoord')
         if any(local(x.tag)=='diagnostic' for x in root.iter()):raise SourceError('SRU-query afgewezen')
         records=[x for x in root.iter() if local(x.tag)=='record']
+        if int(first(root,'numberOfRecords','0'))>0 and not records:raise SourceError('SRU-records ontbreken')
         for r in records:
             p=parse_record(r)
             if p['id'].startswith('gmb-') and re.search(r'vergunning',p['title'],re.I): yield p
@@ -99,7 +102,7 @@ def resolve_address(query,municipality):
         for link in links:
             if link in pands:continue
             if not link.startswith(BAG+'/collections/pand/items/'):raise SourceError('Onverwachte pandlink')
-            pands.add(link);pand=get_json(link,{'f':'json'});year=pand.get('properties',{}).get('oorspronkelijk_bouwjaar')
+            pands.add(link);pand=get_json(link,{'f':'json'});year=pand.get('properties',{}).get('bouwjaar')
             if year:years.append(int(year))
     geo=active[0].get('geometry',{}).get('coordinates',[])
     address=' '.join(str(x) for x in [d['straatnaam'],d['huisnummer'],d.get('huisletter'),d.get('huisnummertoevoeging')] if x)

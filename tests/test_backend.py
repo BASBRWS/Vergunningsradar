@@ -5,7 +5,7 @@ from backend import store,domain,sources,billing,jobs,server
 class Base(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.old=store.DB_PATH;store.DB_PATH=self.tmp.name+'/test.sqlite';store.init()
-  self.env=patch.dict(os.environ,{'SMTP_HOST':'smtp.example.invalid','PUBLIC_WEB_URL':'https://example.org','ADMIN_EMAIL':'admin@example.org'},clear=False);self.env.start()
+  self.env=patch.dict(os.environ,{'SMTP_HOST':'smtp.example.invalid','PUBLIC_WEB_URL':'https://example.org','PUBLIC_API_URL':'https://api.example.org','ADMIN_EMAIL':'admin@example.org'},clear=False);self.env.start()
  def tearDown(self):store.DB_PATH=self.old;self.tmp.cleanup();self.env.stop()
  def login(self,email='a@example.org'):
   server.dispatch('POST','/auth/request',{'email':email,'signup':True,'company':'Test BV','preferences':domain.DEFAULT_PREFS})
@@ -96,3 +96,53 @@ class PrivacyTests(Base):
   with patch.object(sources,'resolve_address',return_value=None):jobs.process_publication({'id':'gmb-2026-1','title':'Verbouwen Testlaan 1'},'Delft')
   with store.db() as c:self.assertEqual(c.execute('SELECT count(*) FROM leads').fetchone()[0],0)
 if __name__=='__main__':unittest.main()
+
+class SourceContractTests(Base):
+ def test_sru_requests_xml_and_reads_metadata(self):
+  xml=b'''<searchRetrieveResponse xmlns="http://docs.oasis-open.org/ns/search-ws/sruResponse"><numberOfRecords>1</numberOfRecords><records><record><recordData><meta><identifier>gmb-2026-1</identifier><title>Aanvraag vergunning Testlaan 1</title><available>2026-11-01</available><abstract>Renovatie gevel</abstract><postcodeHuisnummer>1234AB 1</postcodeHuisnummer></meta></recordData></record></records></searchRetrieveResponse>'''
+  with patch.object(sources,'fetch',return_value=xml):
+   records=list(sources.publications('Delft','2026-11-01','2026-11-01'));self.assertEqual(records[0]['summary'],'Renovatie gevel');self.assertEqual(sources.address_queries(records[0]),['1234AB 1'])
+ def test_bag_uses_all_objects_and_bouwjaar_property(self):
+  location={'response':{'docs':[{'gemeentenaam':'Delft','straatnaam':'Testlaan','huisnummer':1,'postcode':'1234AB','woonplaatsnaam':'Delft'}]}}
+  features={'features':[{'properties':{'status':'Verblijfsobject in gebruik','gebruiksdoel':'kantoorfunctie','oppervlakte':300,'identificatie':'vbo1','pand.href':[sources.BAG+'/collections/pand/items/one']},'geometry':{'coordinates':[4.3,52.0]}},{'properties':{'status':'Verblijfsobject in gebruik','gebruiksdoel':'industriefunctie','oppervlakte':350,'identificatie':'vbo2','pand.href':[sources.BAG+'/collections/pand/items/one']}}]}
+  with patch.object(sources,'get_json',side_effect=[location,features,{'properties':{'bouwjaar':1985}}]):
+   result=sources.resolve_address('Testlaan 1','Delft');self.assertEqual(result['year'],1985);self.assertEqual(result['area'],650);self.assertEqual(result['classification'],'zakelijk')
+ def test_bag_mixed_second_object_excludes_address(self):
+  loc={'response':{'docs':[{'gemeentenaam':'Delft','straatnaam':'Testlaan','huisnummer':1,'postcode':'1234AB'}]}}
+  vbos={'features':[{'properties':{'status':'Verblijfsobject in gebruik','gebruiksdoel':u}} for u in ['kantoorfunctie','woonfunctie']]}
+  with patch.object(sources,'get_json',side_effect=[loc,vbos]):self.assertEqual(sources.resolve_address('Testlaan 1','Delft')['classification'],'gemengd')
+ def test_bag_ambiguous_geocode_rejected(self):
+  d={'gemeentenaam':'Delft','straatnaam':'Testlaan','huisnummer':1,'postcode':'1234AB'}
+  with patch.object(sources,'get_json',return_value={'response':{'docs':[d,d]}}):self.assertIsNone(sources.resolve_address('Testlaan 1','Delft'))
+
+class IntegrationTests(Base):
+ def test_ingest_isolates_failed_municipality(self):
+  with store.db() as c:
+   c.execute('UPDATE config SET data=? WHERE key=?',(store.dumps([{'name':'Delft','active':True},{'name':'Gouda','active':True}]),'municipalities'))
+   for m in ['Delft','Gouda']:c.execute('INSERT INTO checkpoints VALUES(?,?)',(m,(domain.now().date()-timedelta(days=2)).isoformat()))
+  def pub(m,*args):
+   if m=='Delft':raise sources.SourceError('test error')
+   return iter([])
+  with patch.dict(os.environ,{'KVK_API_KEY':'not-a-real-key'}),patch.object(sources,'publications',side_effect=pub):jobs.ingest()
+  with store.db() as c:
+   cp={r['municipality']:r['day'] for r in c.execute('SELECT * FROM checkpoints')};self.assertLess(cp['Delft'],cp['Gouda']);self.assertEqual(c.execute('SELECT errors FROM reports WHERE municipality=?',('Delft',)).fetchone()[0],1)
+ def test_webhook_paid_once_and_subscription_created_once(self):
+  token=self.login();me=server.dispatch('GET','/me',{},'Bearer '+token);account=me['account_id']
+  with store.db() as c:c.execute('UPDATE accounts SET customer_id=? WHERE id=?',('cst_test',account))
+  payment={'id':'tr_test','status':'paid','sequenceType':'first','customerId':'cst_test','amount':{'currency':'EUR','value':'47.19'},'metadata':{'account':account,'interval':'monthly'},'description':'Test'}
+  def provider(path,*args,**kwargs):return {'id':'sub_test'} if '/subscriptions' in path else payment
+  with patch.object(billing,'call',side_effect=provider) as call:
+   billing.webhook('tr_test')
+   with store.db() as c:first=c.execute('SELECT paid_until FROM accounts').fetchone()[0]
+   billing.webhook('tr_test')
+   with store.db() as c:self.assertEqual(c.execute('SELECT paid_until FROM accounts').fetchone()[0],first)
+   self.assertEqual(sum('/subscriptions' in c.args[0] for c in call.call_args_list),1)
+ def test_webhook_wrong_amount_is_not_paid(self):
+  token=self.login();account=server.dispatch('GET','/me',{},'Bearer '+token)['account_id']
+  with store.db() as c:c.execute('UPDATE accounts SET customer_id=? WHERE id=?',('cst_test',account))
+  payment={'id':'tr_test','status':'paid','customerId':'cst_test','amount':{'currency':'EUR','value':'0.01'},'metadata':{'account':account,'interval':'monthly'}}
+  with patch.object(billing,'call',return_value=payment):
+   with self.assertRaises(ValueError):billing.webhook('tr_test')
+  with store.db() as c:self.assertIsNone(c.execute('SELECT paid_until FROM accounts').fetchone()[0])
+ def test_public_summary_removes_known_company_name(self):
+  l=self.lead();l['summary']='Renovatie bij Voorbeeld BV';self.assertNotIn('Voorbeeld BV',domain.public_lead(l)['summary'])
