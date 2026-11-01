@@ -1,3 +1,4 @@
+import {INSTALLATION_PRODUCTS} from './installation-catalog.js';
 // All amounts in the calculation result are integer euro cents.
 export const FIELDS = [
   ['trade','Installatiegebied',8,true,'Wat wil je laten installeren of aanpassen, bijvoorbeeld elektra, verwarming, water of ventilatie?'],
@@ -29,7 +30,8 @@ export const CATALOG = [
   {id:'klein',name:'Bevestigingsmateriaal, voorbeeld',category:'material',unit:'set',cost:95},
   {id:'hoog',name:'Hoogwerker huur, voorbeeld',category:'equipment',unit:'dag',cost:165},
   {id:'rit',name:'Transport en afvoer, voorbeeld',category:'project',unit:'rit',cost:75},
-  {id:'keur',name:'Onafhankelijke inspectie, voorbeeld',category:'subcontract',unit:'post',cost:425}
+  {id:'keur',name:'Onafhankelijke inspectie, voorbeeld',category:'subcontract',unit:'post',cost:425},
+  ...INSTALLATION_PRODUCTS
 ];
 export const money = cents => new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(cents/100);
 export const id = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -127,7 +129,7 @@ export function parseCSV(text){
   const headers=rows.shift()?.map(x=>x.trim().toLowerCase().replace(/^\uFEFF/,''))||[];
   for(const h of ['name','category','unit','cost'])if(!headers.includes(h))throw new Error('CSV-kolommen vereist, name;category;unit;cost.');
   if(!rows.length||rows.length>500)throw new Error('Importeer 1 tot 500 catalogusregels.');
-  return rows.map((r,i)=>{if(r.length!==headers.length)throw new Error(`CSV-regel ${i+2} heeft een verkeerd aantal kolommen.`);const v=Object.fromEntries(headers.map((h,j)=>[h,r[j].trim()]));if(!v.cost)throw new Error(`Kostprijs ontbreekt op regel ${i+2}.`);const cost=Number(v.cost.replace(',','.'));finite(cost,'Kostprijs',0,1e6);if(!v.name||!v.unit||!Object.hasOwn(CATEGORIES,v.category)||(v.category==='labor'&&v.unit!=='uur'))throw new Error(`Controleer CSV-regel ${i+2}.`);return {id:id(),name:v.name.slice(0,200),category:v.category,unit:v.unit.slice(0,30),cost};});
+  return rows.map((r,i)=>{if(r.length!==headers.length)throw new Error(`CSV-regel ${i+2} heeft een verkeerd aantal kolommen.`);const v=Object.fromEntries(headers.map((h,j)=>[h,r[j].trim()]));if(!v.cost)throw new Error(`Kostprijs ontbreekt op regel ${i+2}.`);const cost=Number(v.cost.replace(',','.'));finite(cost,'Kostprijs',0,1e6);if(!v.name||!v.unit||!Object.hasOwn(CATEGORIES,v.category)||(v.category==='labor'&&v.unit!=='uur'))throw new Error(`Controleer CSV-regel ${i+2}.`);return {id:id(),name:v.name.slice(0,200),category:v.category,unit:v.unit.slice(0,30),cost,...(v.code?{code:v.code.slice(0,40)}:{}),...(v.group?{group:v.group.slice(0,100)}:{}),...(['demo','eigen'].includes(v.pricetype)?{priceType:v.pricetype}:{})};});
 }
 export function validateProject(p){
   if(!p||typeof p!=='object'||!p.fields||!Array.isArray(p.lines)||!p.settings)throw new Error('Ongeldig projectbestand.');
@@ -135,7 +137,7 @@ export function validateProject(p){
   for(const k of ['company','quotePrefix','terms'])if(typeof clean.settings[k]!=='string')throw new Error('Ongeldige bedrijfsinstelling.');
   finite(clean.settings.validDays,'Geldigheid',1,365);
   for(const f of FIELDS){const value=p.fields[f.id]?.value;if(typeof value!=='string'||value.length>3000)throw new Error('Ongeldige opdrachtgegevens.');clean.fields[f.id]={value,confirmed:false,source:'Import, opnieuw bevestigen'};}
-  clean.lines=p.lines.map(l=>({id:id(),name:String(l.name||'').slice(0,200),category:l.category,unit:String(l.unit||'').slice(0,30),qty:l.qty,cost:l.cost}));calculate(clean.lines,clean.settings);
+  clean.lines=p.lines.map(l=>({id:id(),name:String(l.name||'').slice(0,200),category:l.category,unit:String(l.unit||'').slice(0,30),qty:l.qty,cost:l.cost,...(typeof l.code==='string'?{code:l.code.slice(0,40)}:{}),...(typeof l.group==='string'?{group:l.group.slice(0,100)}:{}),...(['demo','eigen'].includes(l.priceType)?{priceType:l.priceType}:{})}));calculate(clean.lines,clean.settings);
   for(const k of ['design','plan','assumptions']){if(typeof p[k]!=='string'||p[k].length>30000)throw new Error('Ongeldige documenttekst.');clean[k]=p[k];}
   clean.messages=(Array.isArray(p.messages)?p.messages:[]).slice(-100).filter(m=>['user','assistant'].includes(m.role)&&typeof m.text==='string').map(m=>({role:m.role,text:m.text.slice(0,5000),phase:String(m.phase||'Import')}));
   clean.asked=nextField(clean)?.id||'';return clean;

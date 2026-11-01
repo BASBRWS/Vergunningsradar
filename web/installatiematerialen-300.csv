@@ -1,0 +1,301 @@
+﻿code;group;name;category;unit;cost;priceType
+EL-001;Kabels en bedrading;VD draad 1,5 mm² bruin;material;meter;0.28;demo
+EL-002;Kabels en bedrading;VD draad 1,5 mm² blauw;material;meter;0.28;demo
+EL-003;Kabels en bedrading;VD draad 1,5 mm² zwart;material;meter;0.28;demo
+EL-004;Kabels en bedrading;VD draad 1,5 mm² geel/groen;material;meter;0.3;demo
+EL-005;Kabels en bedrading;VD draad 2,5 mm² bruin;material;meter;0.44;demo
+EL-006;Kabels en bedrading;VD draad 2,5 mm² blauw;material;meter;0.44;demo
+EL-007;Kabels en bedrading;VD draad 2,5 mm² zwart;material;meter;0.44;demo
+EL-008;Kabels en bedrading;VD draad 2,5 mm² geel/groen;material;meter;0.46;demo
+EL-009;Kabels en bedrading;VD draad 4 mm² bruin;material;meter;0.78;demo
+EL-010;Kabels en bedrading;VD draad 4 mm² geel/groen;material;meter;0.8;demo
+EL-011;Kabels en bedrading;VD draad 6 mm² bruin;material;meter;1.15;demo
+EL-012;Kabels en bedrading;VD draad 6 mm² geel/groen;material;meter;1.18;demo
+EL-013;Kabels en bedrading;YMVK installatiekabel 3G1,5 mm²;material;meter;1.4;demo
+EL-014;Kabels en bedrading;YMVK installatiekabel 3G2,5 mm²;material;meter;2.1;demo
+EL-015;Kabels en bedrading;YMVK installatiekabel 5G1,5 mm²;material;meter;2.3;demo
+EL-016;Kabels en bedrading;YMVK installatiekabel 5G2,5 mm²;material;meter;3.6;demo
+EL-017;Kabels en bedrading;YMVK installatiekabel 5G4 mm²;material;meter;5.9;demo
+EL-018;Kabels en bedrading;YMVK installatiekabel 5G6 mm²;material;meter;8.2;demo
+EL-019;Kabels en bedrading;Grondkabel YMVK-as 2x2,5 mm² + aardlitze;material;meter;3.3;demo
+EL-020;Kabels en bedrading;Grondkabel YMVK-as 4x2,5 mm² + aardlitze;material;meter;5.2;demo
+EL-021;Kabels en bedrading;Rubber kabel H07RN-F 3G1,5 mm²;material;meter;2.1;demo
+EL-022;Kabels en bedrading;Rubber kabel H07RN-F 3G2,5 mm²;material;meter;3.2;demo
+EL-023;Kabels en bedrading;Rubber kabel H07RN-F 5G2,5 mm²;material;meter;5.3;demo
+EL-024;Kabels en bedrading;Signaalkabel 2x0,8 mm;material;meter;0.62;demo
+EL-025;Kabels en bedrading;Signaalkabel 4x0,8 mm;material;meter;0.95;demo
+EL-026;Kabels en bedrading;UTP installatiekabel Cat6;material;meter;0.65;demo
+EL-027;Kabels en bedrading;Afgeschermde datakabel Cat6A;material;meter;1.2;demo
+EL-028;Kabels en bedrading;Coaxkabel 75 ohm;material;meter;0.8;demo
+EL-029;Kabels en bedrading;Aardingsdraad 16 mm² geel/groen;material;meter;2.95;demo
+EL-030;Kabels en bedrading;Soepele aansluitkabel H05VV-F 3G1 mm²;material;meter;0.95;demo
+SB-001;Schakelmateriaal en beveiliging;Wandcontactdoos enkel randaarde inbouw;product;stuk;6.5;demo
+SB-002;Schakelmateriaal en beveiliging;Wandcontactdoos dubbel randaarde inbouw;product;stuk;9.5;demo
+SB-003;Schakelmateriaal en beveiliging;Wandcontactdoos enkel opbouw;product;stuk;8.5;demo
+SB-004;Schakelmateriaal en beveiliging;Wandcontactdoos dubbel opbouw;product;stuk;12;demo
+SB-005;Schakelmateriaal en beveiliging;Wandcontactdoos spatwaterdicht IP44;product;stuk;14;demo
+SB-006;Schakelmateriaal en beveiliging;Wandcontactdoos spatwaterdicht IP55;product;stuk;18;demo
+SB-007;Schakelmateriaal en beveiliging;Wisselschakelaar inbouw;product;stuk;6;demo
+SB-008;Schakelmateriaal en beveiliging;Serieschakelaar inbouw;product;stuk;8.5;demo
+SB-009;Schakelmateriaal en beveiliging;Kruisschakelaar inbouw;product;stuk;11;demo
+SB-010;Schakelmateriaal en beveiliging;Drukknop inbouw;product;stuk;8;demo
+SB-011;Schakelmateriaal en beveiliging;Afdekraam enkel;product;stuk;2.5;demo
+SB-012;Schakelmateriaal en beveiliging;Afdekraam dubbel;product;stuk;4.2;demo
+SB-013;Schakelmateriaal en beveiliging;Afdekraam drievoudig;product;stuk;6.4;demo
+SB-014;Schakelmateriaal en beveiliging;Afdekraam viervoudig;product;stuk;8.8;demo
+SB-015;Schakelmateriaal en beveiliging;LED dimmer faseafsnijding;product;stuk;38;demo
+SB-016;Schakelmateriaal en beveiliging;Data-aansluiting RJ45 Cat6 enkel;product;stuk;12;demo
+SB-017;Schakelmateriaal en beveiliging;Data-aansluiting RJ45 Cat6 dubbel;product;stuk;19;demo
+SB-018;Schakelmateriaal en beveiliging;USB-C laadcontactdoos inbouw;product;stuk;32;demo
+SB-019;Schakelmateriaal en beveiliging;Installatieautomaat B16 1P+N;product;stuk;13;demo
+SB-020;Schakelmateriaal en beveiliging;Installatieautomaat C16 1P+N;product;stuk;15;demo
+SB-021;Schakelmateriaal en beveiliging;Installatieautomaat B20 1P+N;product;stuk;15;demo
+SB-022;Schakelmateriaal en beveiliging;Aardlekschakelaar type A 40 A 30 mA 2-polig;product;stuk;32;demo
+SB-023;Schakelmateriaal en beveiliging;Aardlekschakelaar type A 40 A 30 mA 4-polig;product;stuk;52;demo
+SB-024;Schakelmateriaal en beveiliging;Aardlekautomaat type A B16 30 mA 1P+N;product;stuk;38;demo
+SB-025;Schakelmateriaal en beveiliging;Hoofdschakelaar 40 A 4-polig;product;stuk;28;demo
+SB-026;Schakelmateriaal en beveiliging;Overspanningsbeveiliging type 2 3P+N;product;stuk;95;demo
+SB-027;Schakelmateriaal en beveiliging;Modulaire verdeelkast leeg 12 modules;product;stuk;36;demo
+SB-028;Schakelmateriaal en beveiliging;Modulaire verdeelkast leeg 24 modules;product;stuk;58;demo
+SB-029;Schakelmateriaal en beveiliging;Werkschakelaar 25 A 4-polig IP65;product;stuk;26;demo
+SB-030;Schakelmateriaal en beveiliging;CEE wandcontactdoos 16 A 5-polig;product;stuk;24;demo
+BG-001;Buis en kabelgeleiding;Installatiebuis PVC glad 16 mm;material;meter;0.38;demo
+BG-002;Buis en kabelgeleiding;Installatiebuis PVC glad 19 mm;material;meter;0.55;demo
+BG-003;Buis en kabelgeleiding;Installatiebuis PVC glad 25 mm;material;meter;0.95;demo
+BG-004;Buis en kabelgeleiding;Installatiebuis PVC glad 32 mm;material;meter;1.6;demo
+BG-005;Buis en kabelgeleiding;Flexibele installatiebuis 16 mm;material;meter;0.42;demo
+BG-006;Buis en kabelgeleiding;Flexibele installatiebuis 19 mm;material;meter;0.58;demo
+BG-007;Buis en kabelgeleiding;Flexibele installatiebuis 25 mm;material;meter;1.1;demo
+BG-008;Buis en kabelgeleiding;Halogeenvrije installatiebuis 16 mm;material;meter;0.75;demo
+BG-009;Buis en kabelgeleiding;Halogeenvrije installatiebuis 20 mm;material;meter;1.05;demo
+BG-010;Buis en kabelgeleiding;Installatiebocht PVC 16 mm;material;stuk;0.4;demo
+BG-011;Buis en kabelgeleiding;Installatiebocht PVC 19 mm;material;stuk;0.55;demo
+BG-012;Buis en kabelgeleiding;Installatiebocht PVC 25 mm;material;stuk;0.85;demo
+BG-013;Buis en kabelgeleiding;Mof installatiebuis 16 mm;material;stuk;0.15;demo
+BG-014;Buis en kabelgeleiding;Mof installatiebuis 19 mm;material;stuk;0.2;demo
+BG-015;Buis en kabelgeleiding;Mof installatiebuis 25 mm;material;stuk;0.35;demo
+BG-016;Buis en kabelgeleiding;Buisklem 16 mm;material;stuk;0.12;demo
+BG-017;Buis en kabelgeleiding;Buisklem 19 mm;material;stuk;0.15;demo
+BG-018;Buis en kabelgeleiding;Buisklem 25 mm;material;stuk;0.22;demo
+BG-019;Buis en kabelgeleiding;Inbouwdoos enkel diepte 40 mm;material;stuk;1.1;demo
+BG-020;Buis en kabelgeleiding;Inbouwdoos enkel diepte 50 mm;material;stuk;1.4;demo
+BG-021;Buis en kabelgeleiding;Holledwanddoos enkel;material;stuk;1.7;demo
+BG-022;Buis en kabelgeleiding;Centraaldoos vierkant 16 mm;material;stuk;2.9;demo
+BG-023;Buis en kabelgeleiding;Lasdoos IP65 80x80 mm;material;stuk;4.4;demo
+BG-024;Buis en kabelgeleiding;Kabelgoot PVC 25x16 mm;material;meter;1.8;demo
+BG-025;Buis en kabelgeleiding;Kabelgoot PVC 40x25 mm;material;meter;3.2;demo
+BG-026;Buis en kabelgeleiding;Kabelgoot PVC 60x40 mm;material;meter;5.1;demo
+BG-027;Buis en kabelgeleiding;Wandgoot PVC 100x50 mm;material;meter;10;demo
+BG-028;Buis en kabelgeleiding;Kabelgoot staal geperforeerd 100 mm;material;meter;9;demo
+BG-029;Buis en kabelgeleiding;Kabelgoot staal geperforeerd 200 mm;material;meter;15;demo
+BG-030;Buis en kabelgeleiding;Kabeldraagsysteem draadgoot 100 mm;material;meter;8.5;demo
+VL-001;Verlichting en regeling;LED paneel 600x600 mm 4000 K;product;stuk;45;demo
+VL-002;Verlichting en regeling;LED paneel 600x600 mm 3000 K;product;stuk;45;demo
+VL-003;Verlichting en regeling;LED paneel 1200x300 mm 4000 K;product;stuk;55;demo
+VL-004;Verlichting en regeling;LED opbouwframe paneel 600x600 mm;product;stuk;15;demo
+VL-005;Verlichting en regeling;LED inbouwdownlight 150 mm 3000 K;product;stuk;18;demo
+VL-006;Verlichting en regeling;LED inbouwdownlight 200 mm 4000 K;product;stuk;25;demo
+VL-007;Verlichting en regeling;LED opbouwplafonnière 18 W;product;stuk;24;demo
+VL-008;Verlichting en regeling;LED opbouwplafonnière 24 W;product;stuk;32;demo
+VL-009;Verlichting en regeling;LED wandarmatuur buiten IP65;product;stuk;38;demo
+VL-010;Verlichting en regeling;LED schijnwerper 20 W IP65;product;stuk;20;demo
+VL-011;Verlichting en regeling;LED schijnwerper 50 W IP65;product;stuk;36;demo
+VL-012;Verlichting en regeling;LED schijnwerper 100 W IP65;product;stuk;65;demo
+VL-013;Verlichting en regeling;LED vochtbestendig armatuur 1200 mm;product;stuk;35;demo
+VL-014;Verlichting en regeling;LED vochtbestendig armatuur 1500 mm;product;stuk;45;demo
+VL-015;Verlichting en regeling;LED lijnarmatuur 1500 mm 4000 K;product;stuk;55;demo
+VL-016;Verlichting en regeling;LED highbay armatuur 100 W;product;stuk;95;demo
+VL-017;Verlichting en regeling;LED highbay armatuur 150 W;product;stuk;125;demo
+VL-018;Verlichting en regeling;LED noodverlichting opbouw;product;stuk;48;demo
+VL-019;Verlichting en regeling;LED vluchtwegaanduiding;product;stuk;58;demo
+VL-020;Verlichting en regeling;LED spot GU10 5 W 2700 K;product;stuk;3.2;demo
+VL-021;Verlichting en regeling;LED lamp E27 8 W 2700 K;product;stuk;2.6;demo
+VL-022;Verlichting en regeling;LED buis T8 1200 mm;product;stuk;7;demo
+VL-023;Verlichting en regeling;LED strip 24 V 9,6 W per meter;product;meter;5;demo
+VL-024;Verlichting en regeling;LED strip 24 V 14,4 W per meter;product;meter;7.5;demo
+VL-025;Verlichting en regeling;LED voeding 24 V 60 W;product;stuk;22;demo
+VL-026;Verlichting en regeling;LED voeding 24 V 150 W;product;stuk;38;demo
+VL-027;Verlichting en regeling;DALI LED driver 40 W;product;stuk;28;demo
+VL-028;Verlichting en regeling;Aanwezigheidssensor plafond 360 graden;product;stuk;28;demo
+VL-029;Verlichting en regeling;Bewegingssensor buiten IP55;product;stuk;22;demo
+VL-030;Verlichting en regeling;Schemerschakelaar buiten;product;stuk;19;demo
+WK-001;Waterleidingen en koppelingen;Meerlagenbuis 16x2 mm;material;meter;1.1;demo
+WK-002;Waterleidingen en koppelingen;Meerlagenbuis 20x2 mm;material;meter;1.65;demo
+WK-003;Waterleidingen en koppelingen;Meerlagenbuis 25x2,5 mm;material;meter;2.9;demo
+WK-004;Waterleidingen en koppelingen;Meerlagenbuis 32x3 mm;material;meter;4.8;demo
+WK-005;Waterleidingen en koppelingen;Koperen buis 12 mm;material;meter;4.2;demo
+WK-006;Waterleidingen en koppelingen;Koperen buis 15 mm;material;meter;5.5;demo
+WK-007;Waterleidingen en koppelingen;Koperen buis 22 mm;material;meter;8.9;demo
+WK-008;Waterleidingen en koppelingen;Koperen buis 28 mm;material;meter;12.5;demo
+WK-009;Waterleidingen en koppelingen;Perskoppeling recht 16 mm;material;stuk;2.4;demo
+WK-010;Waterleidingen en koppelingen;Perskoppeling recht 20 mm;material;stuk;3.1;demo
+WK-011;Waterleidingen en koppelingen;Perskoppeling recht 25 mm;material;stuk;4.9;demo
+WK-012;Waterleidingen en koppelingen;Perskoppeling recht 32 mm;material;stuk;7.2;demo
+WK-013;Waterleidingen en koppelingen;Persknie 90 graden 16 mm;material;stuk;3.2;demo
+WK-014;Waterleidingen en koppelingen;Persknie 90 graden 20 mm;material;stuk;4.1;demo
+WK-015;Waterleidingen en koppelingen;Persknie 90 graden 25 mm;material;stuk;6.1;demo
+WK-016;Waterleidingen en koppelingen;Persknie 90 graden 32 mm;material;stuk;9.5;demo
+WK-017;Waterleidingen en koppelingen;Pers T-stuk 16 mm;material;stuk;4.8;demo
+WK-018;Waterleidingen en koppelingen;Pers T-stuk 20 mm;material;stuk;6.2;demo
+WK-019;Waterleidingen en koppelingen;Pers T-stuk 25 mm;material;stuk;8.9;demo
+WK-020;Waterleidingen en koppelingen;Pers verloop 20 naar 16 mm;material;stuk;3.8;demo
+WK-021;Waterleidingen en koppelingen;Pers verloop 25 naar 20 mm;material;stuk;5.2;demo
+WK-022;Waterleidingen en koppelingen;Pers verloop 32 naar 25 mm;material;stuk;7.4;demo
+WK-023;Waterleidingen en koppelingen;Muurplaat pers 16 mm x 1/2 inch;material;stuk;5.8;demo
+WK-024;Waterleidingen en koppelingen;Muurplaat pers 20 mm x 1/2 inch;material;stuk;6.9;demo
+WK-025;Waterleidingen en koppelingen;Overgang pers 16 mm x 1/2 inch buitendraad;material;stuk;3.5;demo
+WK-026;Waterleidingen en koppelingen;Overgang pers 20 mm x 3/4 inch buitendraad;material;stuk;4.6;demo
+WK-027;Waterleidingen en koppelingen;Knelkoppeling recht 15 mm;material;stuk;2.5;demo
+WK-028;Waterleidingen en koppelingen;Knelknie 15 mm;material;stuk;3.2;demo
+WK-029;Waterleidingen en koppelingen;Knel T-stuk 15 mm;material;stuk;4.5;demo
+WK-030;Waterleidingen en koppelingen;Flexibele aansluitslang 3/8 inch 50 cm;material;stuk;4.8;demo
+SA-001;Sanitair en afvoer;Wastafelmengkraan standaard;product;stuk;55;demo
+SA-002;Sanitair en afvoer;Keukenmengkraan standaard;product;stuk;75;demo
+SA-003;Sanitair en afvoer;Douchemengkraan thermostatisch;product;stuk;95;demo
+SA-004;Sanitair en afvoer;Badmengkraan thermostatisch;product;stuk;135;demo
+SA-005;Sanitair en afvoer;Buitenkraan vorstbestendig;product;stuk;58;demo
+SA-006;Sanitair en afvoer;Hoekstopkraan 1/2 x 3/8 inch;product;stuk;6.5;demo
+SA-007;Sanitair en afvoer;Wasmachinekraan 1/2 inch;product;stuk;8.5;demo
+SA-008;Sanitair en afvoer;Inlaatcombinatie boiler 8 bar;product;stuk;23;demo
+SA-009;Sanitair en afvoer;Wastafel keramiek 60 cm;product;stuk;68;demo
+SA-010;Sanitair en afvoer;Fontein keramiek 40 cm;product;stuk;45;demo
+SA-011;Sanitair en afvoer;Wandcloset keramiek standaard;product;stuk;105;demo
+SA-012;Sanitair en afvoer;Toiletzitting softclose;product;stuk;28;demo
+SA-013;Sanitair en afvoer;Inbouwreservoir toilet met frame;product;stuk;165;demo
+SA-014;Sanitair en afvoer;Bedieningsplaat toilet dubbelspoeling;product;stuk;38;demo
+SA-015;Sanitair en afvoer;Doucheslang 150 cm;product;stuk;8;demo
+SA-016;Sanitair en afvoer;Handdouche met houder;product;stuk;18;demo
+SA-017;Sanitair en afvoer;Glijstangset douche 60 cm;product;stuk;32;demo
+SA-018;Sanitair en afvoer;Douchegoot 70 cm;product;stuk;62;demo
+SA-019;Sanitair en afvoer;Doucheput 100x100 mm;product;stuk;22;demo
+SA-020;Sanitair en afvoer;Wastafelsifon 32 mm;product;stuk;9;demo
+SA-021;Sanitair en afvoer;Keukensifon 40 mm;product;stuk;12;demo
+SA-022;Sanitair en afvoer;PVC afvoerbuis 32 mm;product;meter;1.3;demo
+SA-023;Sanitair en afvoer;PVC afvoerbuis 40 mm;product;meter;1.7;demo
+SA-024;Sanitair en afvoer;PVC afvoerbuis 50 mm;product;meter;2.4;demo
+SA-025;Sanitair en afvoer;PVC afvoerbuis 75 mm;product;meter;4.6;demo
+SA-026;Sanitair en afvoer;PVC afvoerbuis 110 mm;product;meter;7.2;demo
+SA-027;Sanitair en afvoer;PVC afvoerbocht 45 graden 50 mm;product;stuk;1.2;demo
+SA-028;Sanitair en afvoer;PVC afvoerbocht 87 graden 110 mm;product;stuk;5.5;demo
+SA-029;Sanitair en afvoer;PVC afvoer T-stuk 45 graden 110 mm;product;stuk;8;demo
+SA-030;Sanitair en afvoer;Afvoerbeluchter 50 mm;product;stuk;13;demo
+VA-001;Verwarming en appendages;Paneelradiator type 22 600x600 mm;product;stuk;85;demo
+VA-002;Verwarming en appendages;Paneelradiator type 22 600x1000 mm;product;stuk;125;demo
+VA-003;Verwarming en appendages;Paneelradiator type 22 600x1400 mm;product;stuk;165;demo
+VA-004;Verwarming en appendages;Paneelradiator type 33 600x1000 mm;product;stuk;185;demo
+VA-005;Verwarming en appendages;Handdoekradiator 600x1200 mm;product;stuk;105;demo
+VA-006;Verwarming en appendages;Lagetemperatuurconvector 1000 mm;product;stuk;295;demo
+VA-007;Verwarming en appendages;Radiatorkraan thermostatisch recht 1/2 inch;product;stuk;13;demo
+VA-008;Verwarming en appendages;Radiatorkraan thermostatisch haaks 1/2 inch;product;stuk;13;demo
+VA-009;Verwarming en appendages;Thermostaatkop radiator;product;stuk;11;demo
+VA-010;Verwarming en appendages;Radiatorvoetventiel 1/2 inch;product;stuk;9;demo
+VA-011;Verwarming en appendages;Radiatoraansluitblok 50 mm;product;stuk;18;demo
+VA-012;Verwarming en appendages;Radiatorontluchter 1/2 inch;product;stuk;1.8;demo
+VA-013;Verwarming en appendages;Expansievat cv 18 liter;product;stuk;28;demo
+VA-014;Verwarming en appendages;Expansievat cv 25 liter;product;stuk;36;demo
+VA-015;Verwarming en appendages;Expansievatconsole met koppeling;product;stuk;19;demo
+VA-016;Verwarming en appendages;Veiligheidsventiel cv 3 bar;product;stuk;8;demo
+VA-017;Verwarming en appendages;Automatische ontluchter cv;product;stuk;9;demo
+VA-018;Verwarming en appendages;Vul- en aftapkraan cv 1/2 inch;product;stuk;6;demo
+VA-019;Verwarming en appendages;Vulslang cv 150 cm;product;stuk;8;demo
+VA-020;Verwarming en appendages;Vuilafscheider magnetisch 22 mm;product;stuk;55;demo
+VA-021;Verwarming en appendages;Luchtafscheider 22 mm;product;stuk;62;demo
+VA-022;Verwarming en appendages;Circulatiepomp cv 25-60;product;stuk;125;demo
+VA-023;Verwarming en appendages;Kamerthermostaat aan/uit bedraad;product;stuk;32;demo
+VA-024;Verwarming en appendages;Kamerthermostaat modulerend bedraad;product;stuk;75;demo
+VA-025;Verwarming en appendages;Vloerverwarmingsbuis 16x2 mm;product;meter;0.7;demo
+VA-026;Verwarming en appendages;Vloerverwarmingsverdeler 4 groepen;product;stuk;185;demo
+VA-027;Verwarming en appendages;Vloerverwarmingsverdeler 6 groepen;product;stuk;235;demo
+VA-028;Verwarming en appendages;Vloerverwarmingsverdeler 8 groepen;product;stuk;295;demo
+VA-029;Verwarming en appendages;Thermische motor verdeler 230 V;product;stuk;16;demo
+VA-030;Verwarming en appendages;Zone-regelmodule vloerverwarming 8 zones;product;stuk;95;demo
+WP-001;Warmtepomp en koeling;Monoblock warmtepomp buitenunit 5 kW;product;stuk;2450;demo
+WP-002;Warmtepomp en koeling;Monoblock warmtepomp buitenunit 8 kW;product;stuk;3150;demo
+WP-003;Warmtepomp en koeling;Monoblock warmtepomp buitenunit 12 kW;product;stuk;4250;demo
+WP-004;Warmtepomp en koeling;Warmtepompboiler 200 liter;product;stuk;1350;demo
+WP-005;Warmtepomp en koeling;Warmtepompboiler 270 liter;product;stuk;1650;demo
+WP-006;Warmtepomp en koeling;Buffervat cv 50 liter;product;stuk;210;demo
+WP-007;Warmtepomp en koeling;Buffervat cv 100 liter;product;stuk;320;demo
+WP-008;Warmtepomp en koeling;Indirecte warmwaterboiler 200 liter;product;stuk;650;demo
+WP-009;Warmtepomp en koeling;Indirecte warmwaterboiler 300 liter;product;stuk;850;demo
+WP-010;Warmtepomp en koeling;Elektrisch naverwarmingselement 3 kW;product;stuk;115;demo
+WP-011;Warmtepomp en koeling;Hydraulische scheider compact;product;stuk;125;demo
+WP-012;Warmtepomp en koeling;Drieweg omschakelklep 1 inch;product;stuk;85;demo
+WP-013;Warmtepomp en koeling;Debietmeter water 1 inch;product;stuk;45;demo
+WP-014;Warmtepomp en koeling;Vorstbeveiligingsventiel 1 inch;product;stuk;48;demo
+WP-015;Warmtepomp en koeling;Trillingsdemper buitenunit set van 4;product;set;24;demo
+WP-016;Warmtepomp en koeling;Opstellingsbalk buitenunit 600 mm;product;stuk;18;demo
+WP-017;Warmtepomp en koeling;Wandbeugel buitenunit 450 mm;product;set;35;demo
+WP-018;Warmtepomp en koeling;Condenswaterbak buitenunit;product;stuk;42;demo
+WP-019;Warmtepomp en koeling;Condensafvoerpomp airco;product;stuk;58;demo
+WP-020;Warmtepomp en koeling;Condensafvoerslang 16 mm;product;meter;1.1;demo
+WP-021;Warmtepomp en koeling;Koelleiding geïsoleerd 1/4 inch;product;meter;4.2;demo
+WP-022;Warmtepomp en koeling;Koelleiding geïsoleerd 3/8 inch;product;meter;6.2;demo
+WP-023;Warmtepomp en koeling;Koelleiding geïsoleerd 1/2 inch;product;meter;8.8;demo
+WP-024;Warmtepomp en koeling;Koelleiding geïsoleerd 5/8 inch;product;meter;12;demo
+WP-025;Warmtepomp en koeling;Airco wandmodel splitset 2,5 kW;product;set;525;demo
+WP-026;Warmtepomp en koeling;Airco wandmodel splitset 3,5 kW;product;set;650;demo
+WP-027;Warmtepomp en koeling;Airco wandmodel splitset 5 kW;product;set;895;demo
+WP-028;Warmtepomp en koeling;Koelleidinggoot 80x60 mm;product;meter;6;demo
+WP-029;Warmtepomp en koeling;Koelleidinggoot vlakke bocht 80 mm;product;stuk;5;demo
+WP-030;Warmtepomp en koeling;Koelleidinggoot muurdoorvoer 80 mm;product;stuk;7;demo
+VK-001;Ventilatie en luchtkanalen;Mechanische ventilatiebox basis;product;stuk;165;demo
+VK-002;Ventilatie en luchtkanalen;Mechanische ventilatiebox met vochtsensor;product;stuk;225;demo
+VK-003;Ventilatie en luchtkanalen;WTW ventilatie-unit 300 m³/uur;product;stuk;1150;demo
+VK-004;Ventilatie en luchtkanalen;WTW ventilatie-unit 450 m³/uur;product;stuk;1550;demo
+VK-005;Ventilatie en luchtkanalen;Badkamerventilator 100 mm basis;product;stuk;28;demo
+VK-006;Ventilatie en luchtkanalen;Badkamerventilator 100 mm timer;product;stuk;38;demo
+VK-007;Ventilatie en luchtkanalen;Badkamerventilator 100 mm vochtsensor;product;stuk;52;demo
+VK-008;Ventilatie en luchtkanalen;Kanaalventilator 125 mm;product;stuk;58;demo
+VK-009;Ventilatie en luchtkanalen;Kanaalventilator 160 mm;product;stuk;78;demo
+VK-010;Ventilatie en luchtkanalen;CO₂ sensor ventilatie;product;stuk;85;demo
+VK-011;Ventilatie en luchtkanalen;Draadloze bediening ventilatie;product;stuk;48;demo
+VK-012;Ventilatie en luchtkanalen;Ventilatieventiel afvoer 100 mm;product;stuk;5.5;demo
+VK-013;Ventilatie en luchtkanalen;Ventilatieventiel afvoer 125 mm;product;stuk;7;demo
+VK-014;Ventilatie en luchtkanalen;Ventilatieventiel toevoer 125 mm;product;stuk;8.5;demo
+VK-015;Ventilatie en luchtkanalen;Ventilatierooster buiten 125 mm;product;stuk;12;demo
+VK-016;Ventilatie en luchtkanalen;Spirobuis verzinkt 100 mm;product;meter;4.2;demo
+VK-017;Ventilatie en luchtkanalen;Spirobuis verzinkt 125 mm;product;meter;5.3;demo
+VK-018;Ventilatie en luchtkanalen;Spirobuis verzinkt 160 mm;product;meter;7.2;demo
+VK-019;Ventilatie en luchtkanalen;Spirobuis verzinkt 200 mm;product;meter;10.5;demo
+VK-020;Ventilatie en luchtkanalen;Spiralobocht 90 graden 125 mm;product;stuk;7;demo
+VK-021;Ventilatie en luchtkanalen;Spiralobocht 90 graden 160 mm;product;stuk;9.5;demo
+VK-022;Ventilatie en luchtkanalen;Spiralo T-stuk 125 mm;product;stuk;11;demo
+VK-023;Ventilatie en luchtkanalen;Spiralo verloop 160 naar 125 mm;product;stuk;6.5;demo
+VK-024;Ventilatie en luchtkanalen;Flexibele ventilatieslang 125 mm;product;meter;2.8;demo
+VK-025;Ventilatie en luchtkanalen;Geïsoleerde ventilatieslang 160 mm;product;meter;6.5;demo
+VK-026;Ventilatie en luchtkanalen;Geluiddemper rond 125 mm lengte 600 mm;product;stuk;32;demo
+VK-027;Ventilatie en luchtkanalen;Geluiddemper rond 160 mm lengte 600 mm;product;stuk;42;demo
+VK-028;Ventilatie en luchtkanalen;Luchtverdeelkast 6 aansluitingen 75 mm;product;stuk;65;demo
+VK-029;Ventilatie en luchtkanalen;Ventilatiekanaal flexibel 75 mm;product;meter;2.2;demo
+VK-030;Ventilatie en luchtkanalen;WTW filterset generiek 300 m³/uur;product;set;22;demo
+BI-001;Bevestiging isolatie en verbruik;Universele plug 6x30 mm, doos 100 stuks;material;doos;3;demo
+BI-002;Bevestiging isolatie en verbruik;Universele plug 8x40 mm, doos 100 stuks;material;doos;4.5;demo
+BI-003;Bevestiging isolatie en verbruik;Universele plug 10x50 mm, doos 50 stuks;material;doos;5;demo
+BI-004;Bevestiging isolatie en verbruik;Spaanplaatschroef 4x40 mm, doos 200 stuks;material;doos;4.2;demo
+BI-005;Bevestiging isolatie en verbruik;Spaanplaatschroef 5x50 mm, doos 200 stuks;material;doos;6;demo
+BI-006;Bevestiging isolatie en verbruik;Slagplug 6x40 mm, doos 100 stuks;material;doos;5.5;demo
+BI-007;Bevestiging isolatie en verbruik;Betonschroef 6x60 mm, doos 100 stuks;material;doos;12;demo
+BI-008;Bevestiging isolatie en verbruik;Draadeind M8 verzinkt lengte 1 meter;material;stuk;1.2;demo
+BI-009;Bevestiging isolatie en verbruik;Draadeind M10 verzinkt lengte 1 meter;material;stuk;1.8;demo
+BI-010;Bevestiging isolatie en verbruik;Zeskantmoer M8, doos 100 stuks;material;doos;3;demo
+BI-011;Bevestiging isolatie en verbruik;Sluitring M8, doos 100 stuks;material;doos;2.5;demo
+BI-012;Bevestiging isolatie en verbruik;Montagerail 27x18 mm;material;meter;3.2;demo
+BI-013;Bevestiging isolatie en verbruik;Montagerail 41x41 mm;material;meter;7.5;demo
+BI-014;Bevestiging isolatie en verbruik;Pijpbeugel met rubber 15 mm;material;stuk;0.65;demo
+BI-015;Bevestiging isolatie en verbruik;Pijpbeugel met rubber 22 mm;material;stuk;0.8;demo
+BI-016;Bevestiging isolatie en verbruik;Pijpbeugel met rubber 28 mm;material;stuk;0.95;demo
+BI-017;Bevestiging isolatie en verbruik;Pijpbeugel met rubber 35 mm;material;stuk;1.2;demo
+BI-018;Bevestiging isolatie en verbruik;Kabelbinder 200x4,8 mm, zak 100 stuks;material;zak;2.8;demo
+BI-019;Bevestiging isolatie en verbruik;Kabelbinder 300x4,8 mm, zak 100 stuks;material;zak;4.2;demo
+BI-020;Bevestiging isolatie en verbruik;Lasklem 2-polig, doos 100 stuks;material;doos;14;demo
+BI-021;Bevestiging isolatie en verbruik;Lasklem 3-polig, doos 100 stuks;material;doos;18;demo
+BI-022;Bevestiging isolatie en verbruik;Lasklem 5-polig, doos 50 stuks;material;doos;15;demo
+BI-023;Bevestiging isolatie en verbruik;Adereindhuls 1,5 mm², doos 100 stuks;material;doos;2.5;demo
+BI-024;Bevestiging isolatie en verbruik;Adereindhuls 2,5 mm², doos 100 stuks;material;doos;3;demo
+BI-025;Bevestiging isolatie en verbruik;PE buisisolatie 15 mm wand 9 mm;material;meter;0.6;demo
+BI-026;Bevestiging isolatie en verbruik;PE buisisolatie 22 mm wand 9 mm;material;meter;0.8;demo
+BI-027;Bevestiging isolatie en verbruik;Elastomeer buisisolatie 28 mm wand 13 mm;material;meter;3.2;demo
+BI-028;Bevestiging isolatie en verbruik;PTFE afdichtingstape rol 12 meter;material;rol;0.75;demo
+BI-029;Bevestiging isolatie en verbruik;Sanitair siliconenkit koker 310 ml;material;koker;5.5;demo
+BI-030;Bevestiging isolatie en verbruik;PVC lijm bus 250 ml;material;bus;6.5;demo
