@@ -4,7 +4,7 @@
 
 De API leidt account-ID en rol altijd af uit de gehashte Bearer-sessie. De client kan die niet meegeven voor opvolging of betalingen. Leads zelf zijn broninformatie, opvolging wordt uitsluitend binnen een klantaccount gedeeld. Beheer is servermatig afgeschermd. Demobeheer op Pages bevat alleen fictieve gegevens en geeft geen productierechten.
 
-Inlogtokens zijn willekeurig, eenmalig en 15 minuten geldig. Sessies zijn 12 uur geldig. Alleen hashes worden in de database opgeslagen. De frontend bewaart de sessie in sessionStorage en gebruikt een Content Security Policy zonder externe scripts. Inloglinks gebruiken het URL-fragment en worden niet naar de Pages-server gestuurd. Auth-aanvragen hebben een limiet per direct aangesloten proxy-IP en per mailadres. De proxy-IP-limiet is gedeeld achter Caddy; voeg vóór schaalvergroting een betrouwbare proxy-rate-limiter toe in plaats van een door clients te vervalsen X-Forwarded-For te vertrouwen.
+Inlogtokens zijn willekeurig, eenmalig en 15 minuten geldig. Sessies zijn 12 uur geldig. De authenticatietabellen bevatten alleen hashes. De mailwachtrij bevat de inloglink totdat de mail is verstuurd, daarna wordt de mailinhoud gewist. Beveilig ook de database en back-ups op schijfniveau. De frontend bewaart de sessie in sessionStorage en gebruikt een Content Security Policy zonder externe scripts. Inloglinks gebruiken het URL-fragment en worden niet naar de Pages-server gestuurd. Auth-aanvragen hebben een limiet per direct aangesloten proxy-IP en per mailadres. De proxy-IP-limiet is gedeeld achter Caddy; voeg vóór schaalvergroting een betrouwbare proxy-rate-limiter toe in plaats van een door clients te vervalsen X-Forwarded-For te vertrouwen.
 
 ## Bronkwaliteit
 
