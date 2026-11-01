@@ -146,3 +146,10 @@ class IntegrationTests(Base):
   with store.db() as c:self.assertIsNone(c.execute('SELECT paid_until FROM accounts').fetchone()[0])
  def test_public_summary_removes_known_company_name(self):
   l=self.lead();l['summary']='Renovatie bij Voorbeeld BV';self.assertNotIn('Voorbeeld BV',domain.public_lead(l)['summary'])
+
+class AddressRegressionTests(Base):
+ def test_case_number_is_not_a_house_number_range(self):
+  p={'title':'Aanvraag vergunning voor het stucken aan gevel op de locatie Wieldrechtse Zeedijk 104 te Dordrecht zaaknummer Z-25-466568'}
+  self.assertEqual(sources.address_queries(p),['Wieldrechtse Zeedijk 104'])
+ def test_real_range_is_still_unknown(self):
+  self.assertEqual(sources.address_queries({'title':'Aanvraag vergunning op de locatie Octant 6 t/m 103 te Dordrecht zaaknummer Z-25-469416'}),[])

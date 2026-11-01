@@ -58,7 +58,9 @@ def address_queries(p):
         if match:queries.append(' '.join(v for v in match.groups() if v))
     if queries:return list(dict.fromkeys(queries))
     # Reeksen en gecombineerde huisnummers worden bewust niet geraden.
-    title=p['title']
+    title=re.split(r'\b(?:zaaknummer|zaaknr|kenmerk|dossiernummer|dossiernr)\b',p['title'],flags=re.I)[0].strip()
+    address_part=re.search(r'\b(?:op de locatie|locatie|ter plaatse van|op het adres|adres)\s+(.+?)(?:\s+te\s+|,|$)',title,re.I)
+    if address_part:title=address_part.group(1)
     if re.search(r'\d\s*(?:t/m|tot en met|en|/)\s*\d|\d\s*[-–]\s*\d',title,re.I):return []
     for m in re.finditer(r"([A-ZÀ-Ÿ][\w'’.-]*(?:\s+(?:van|de|den|der|het|[A-ZÀ-Ÿ][\w'’.-]*)){0,5})\s+(\d{1,5}[A-Za-z]?)(?!\d)",title):
         if not re.search(r'\b(?:datum|ontvangen|d.d.|kenmerk)\b',m[1],re.I):queries.append(m[0])

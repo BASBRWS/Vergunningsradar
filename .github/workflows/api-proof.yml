@@ -1,0 +1,55 @@
+name: Technische API-proef, geen publicatie
+on:
+  push:
+    branches: ['api-proof/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  api-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Bedrijfsregels en regressies testen
+        run: npm test
+      - name: Echte KOOP, BAG en officiële KvK-testomgeving aanroepen
+        env:
+          KVK_TEST_API_KEY: ${{ secrets.KVK_TEST_API_KEY }}
+        run: python -m backend.api_proof --output artifacts/api-proof.json
+      - name: Downloadbare browserdemo bouwen
+        if: always()
+        run: |
+          node scripts/build-api-demo.mjs
+          if test -f artifacts/api-proof.json; then
+            node scripts/build-api-demo.mjs --report artifacts/api-proof.json --output artifacts/Vergunningradar_API_demo.html
+          fi
+      - name: API-uitslagen samenvatten
+        if: always()
+        run: |
+          python - <<'PY'
+          import json,os,pathlib
+          p=pathlib.Path('artifacts/api-proof.json')
+          if not p.exists():raise SystemExit(0)
+          r=json.loads(p.read_text());d=r['pipeline'];k=r['kvk']
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+            f.write('# API-proef, geen deployment\n\n')
+            f.write(f"Vergunningpublicaties {d['publicationCount']}. Zakelijke of maatschappelijke adressen {len(d['leads'])}. Woonfunctie uitgesloten {d['residential']+d['mixed']}. Verwerkingsfouten {d['errors']}.\n\n")
+            f.write(f"KvK-test {k['status']}. HTTP-status {k.get('serverStatus','zie rapport')}.\n\n")
+            f.write('KvK-testbedrijven zijn niet gekoppeld aan echte panden. Geen mails, klantaccounts of betalingen geactiveerd. De bestaande Pages-site is niet gewijzigd.\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Vergunningradar-API-proef
+          path: |
+            proof/vergunningradar-api-demo.html
+            artifacts/api-proof.json
+            artifacts/Vergunningradar_API_demo.html
+          retention-days: 7

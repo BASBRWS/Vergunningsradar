@@ -9,3 +9,5 @@ dist/
 .openai/
 *.sqlite*
 *.log
+artifacts/
+proof-preview/

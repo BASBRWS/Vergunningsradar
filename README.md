@@ -49,3 +49,7 @@ De publieke instelling `web/config.js` bevat uitsluitend `apiBase`. Met een lege
 - KvK Basisprofiel, https://developers.kvk.nl/nl/documentation/basisprofiel-api.
 - Mollie, https://docs.mollie.com/reference/create-payment.
 - GitHub Pages, https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages.
+
+## Technische API-proef zonder uitrol
+
+De aparte `api-proof/`-branch bevat een downloadbare, zelfstandige browserdemo met echte KOOP- en BAG-aanroepen. De officiële KvK-test wordt ook via GitHub Actions uitgevoerd. Deze workflow publiceert niets naar Pages. Zie [docs/API_PROEF.md](docs/API_PROEF.md).

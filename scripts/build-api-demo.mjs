@@ -1,0 +1,16 @@
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+const args = process.argv.slice(2), option = name => {const i=args.indexOf(name);return i<0?null:args[i+1];};
+const output = option('--output') || 'proof/vergunningradar-api-demo.html';
+const reportPath = option('--report');
+const seed = reportPath ? JSON.parse(await readFile(reportPath,'utf8')) : null;
+const files = await Promise.all(['web/core.js','web/api-client.js','web/api-demo.js','web/style.css','web/api-demo.css','web/mark.svg'].map(p=>readFile(p,'utf8')));
+const image = 'data:image/svg+xml;base64,'+Buffer.from(files[5]).toString('base64');
+const css = files[3]+'\n'+files[4];
+const strip = source=>source.replace(/^import .*?;\r?\n/gm,'').replace(/^export /gm,'');
+const payload = seed ? 'window.VR_API_PROOF='+JSON.stringify(seed).replaceAll('<','\\u003c')+';\n' : '';
+const js=(payload+strip(files[0])+'\nconst e = escapeHTML;\n'+files.slice(1,3).map(strip).join('\n')).replaceAll('src="./mark.svg"',`src="${image}"`).replace(/<\/script/gi,'<\\/script');
+const sha = value=>createHash('sha256').update(value).digest('base64');
+const csp=`default-src 'none'; script-src 'sha256-${sha(js)}'; style-src 'sha256-${sha(css)}'; img-src data:; connect-src https://repository.overheid.nl https://api.pdok.nl https://api.kvk.nl; frame-src https://www.openstreetmap.org; base-uri 'none'; form-action 'none'`;
+const html=`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="theme-color" content="#183e32"><meta http-equiv="Content-Security-Policy" content="${csp}"><title>Vergunningradar, API-proef</title><link rel="icon" href="${image}"><style>${css}</style></head><body><a class="skip" href="#main">Naar inhoud</a><div id="app"></div><div id="toast" role="status" aria-live="polite"></div><dialog id="modal"></dialog><script type="module">${js}</script></body></html>`;
+await mkdir(output.slice(0,output.lastIndexOf('/'))||'.',{recursive:true});await writeFile(output,html);console.log(output+' gebouwd. '+(seed?'Met gedateerde echte proefresultaten.':'Zonder opgeslagen brondata.'));
