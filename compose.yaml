@@ -1,0 +1,52 @@
+services:
+  api:
+    build: .
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - radar-data:/data
+    networks:
+      - internal
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+  scheduler:
+    build: .
+    command: ["python", "-m", "backend.jobs", "scheduler"]
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - radar-data:/data
+    networks:
+      - internal
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+  https:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      - API_DOMAIN=${API_DOMAIN:?Stel API_DOMAIN in .env in}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - internal
+volumes:
+  radar-data:
+  caddy-data:
+  caddy-config:
+networks:
+  internal:

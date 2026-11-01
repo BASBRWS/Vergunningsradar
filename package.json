@@ -1,0 +1,10 @@
+{
+  "name": "vergunningradar-zakelijk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/core.test.mjs && python3 -m unittest discover -s tests -p 'test_*.py'",
+    "build": "node scripts/build.mjs"
+  }
+}

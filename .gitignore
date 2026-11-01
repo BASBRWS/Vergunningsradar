@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+data/
+__pycache__/
+*.pyc
+node_modules/
+dist/
+.openai/
+*.sqlite*
+*.log
