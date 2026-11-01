@@ -5,7 +5,7 @@ from http.server import ThreadingHTTPServer,BaseHTTPRequestHandler
 from .domain import *
 from .store import *
 from .jobs import list_leads,address_key,opted_out,resolve_pending
-from . import sources,billing
+from . import sources,billing,quotation_chat
 log=logging.getLogger('radar')
 class HTTPError(Exception):
     def __init__(self,status,message):self.status=status;self.message=message
@@ -105,6 +105,15 @@ def dispatch(method,path,d,auth='',ip='local'):
         if path=='/webhooks/mollie' and method=='POST':
             billing.webhook(str(d.get('id','')));return {'ok':True}
         u=get_user(c,auth);account=u['account_id']
+        if path=='/calculator/capabilities' and method=='GET':
+            return {'configured':quotation_chat.configured(),'mode':'structured-intake','calculations':'browser-fixed-rules'}
+        if path=='/calculator/chat' and method=='POST':
+            require_write(u)
+            limited(c,'calculator-user:'+u['id'],30)
+            limited(c,'calculator-account:'+account,100)
+            audit(c,u['id'],'calculator-chat',account)
+            c.commit() # Persist quota before slow external I/O, including provider failures.
+            return quotation_chat.chat(d)
         if path=='/me' and method=='GET':return {k:u[k] for k in ['id','account_id','company','email','role','readOnly']}
         if path=='/auth/logout' and method=='POST':c.execute('DELETE FROM sessions WHERE hash=?',(hashed(auth[7:]),));return {'ok':True}
         if path=='/leads' and method=='GET':return list_leads(c,account)
@@ -207,3 +216,4 @@ if __name__=='__main__':
         if not os.environ.get(name):raise SystemExit(name+' ontbreekt')
     if not os.environ['PUBLIC_WEB_URL'].startswith('https://') and os.environ.get('DEVELOPMENT')!='true':raise SystemExit('HTTPS is verplicht.')
     ThreadingHTTPServer(('0.0.0.0',int(os.environ.get('PORT','8080'))),Handler).serve_forever()
+

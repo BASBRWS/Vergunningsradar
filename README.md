@@ -8,6 +8,12 @@ De GitHub Pages-website opent standaard als herkenbare demo. Zestien fictieve pr
 
 De productie-API staat in `backend/`. Deze werkt met SQLite, Python 3.13, SMTP en de officiële KOOP-, PDOK-, KvK- en Mollie-API's. Accounts en opvolggegevens worden niet gepubliceerd naar GitHub Pages. De repo bevat geen sleutels of productiegegevens.
 
+## Offertewerkplaats voor installatiebedrijven
+
+Open `calculator.html` via de link Offertewerkplaats op de website of in de werkruimte. De extra pagina bevat een gerichte klantintake, opdrachtdossier met bevestigingen, kostencatalogus, calculatie van uren en inkoop, overhead, risico, marge of opslag, korting en btw. Conceptontwerp, projectplan, offerteafdruk en projectexport werken lokaal. De volledigheidsscore van 95 procent is geen technische zekerheid. Een vrije AI dialoog vereist de optionele serverkoppeling met eigen API sleutel en modeltoegang. Deze is voorbereid, maar nog niet live aangesloten.
+
+Zie [docs/OFFERTEWERKPLAATS.md](docs/OFFERTEWERKPLAATS.md) voor gebruik, rekenregels en de grenzen van deze demo.
+
 ## Lokaal bekijken
 
 ```sh
@@ -49,3 +55,4 @@ De publieke instelling `web/config.js` bevat uitsluitend `apiBase`. Met een lege
 - KvK Basisprofiel, https://developers.kvk.nl/nl/documentation/basisprofiel-api.
 - Mollie, https://docs.mollie.com/reference/create-payment.
 - GitHub Pages, https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages.
+
