@@ -51,3 +51,29 @@ class CalculatorAuthTests(Base):
         with patch.object(q,'chat') as chat:
             with self.assertRaises(server.HTTPError):server.dispatch('POST','/calculator/chat',input_data(),'Bearer '+token)
             chat.assert_not_called()
+
+class PreparationContractTests(unittest.TestCase):
+    def test_proposals_are_validated_and_cannot_verify_or_confirm(self):
+        result={'reply':'Geen probleem, we bereiden een opname voor.','updates':[], 'next_field':'timing','preparation':[{'field':'existing','kind':'site_visit','note':'Installateur registreert de bestaande installatie.'}]}
+        self.assertEqual(q.validate_output(result),result)
+        for extra in [{'resolved':True},{'accepted':True},{'confirmed':True}]:
+            bad={**result,'preparation':[{**result['preparation'][0],**extra}]}
+            with self.assertRaises(ValueError):q.validate_output(bad)
+        with self.assertRaises(ValueError):q.validate_output({**result,'next_field':'price'})
+        with self.assertRaises(ValueError):q.validate_output({**result,'preparation':[{'field':'scope','kind':'invented','note':'Nee'}]})
+
+    def test_preparation_is_included_in_context_but_extra_properties_are_not(self):
+        data=input_data();data.update(asked='existing',preparation=[{'field':'existing','kind':'assumption','note':'Nog te controleren.','accepted':True,'resolved':False,'cost':999,'apiKey':'must-not-forward'}])
+        clean=q.validate_input(data);self.assertEqual(clean['asked'],'existing');self.assertNotIn('cost',clean['preparation'][0]);self.assertNotIn('apiKey',clean['preparation'][0])
+
+    def test_probe_uses_no_customer_data_and_calls_the_provider_path(self):
+        with patch.object(q,'chat',return_value={'reply':'OK','updates':[]}) as chat:
+            self.assertTrue(q.probe()['providerTested'])
+            data=chat.call_args.args[0];self.assertTrue(all(v['value']=='' for v in data['fields'].values()));self.assertEqual(data['messages'],[])
+
+class ProbeAuthTests(Base):
+    def test_probe_is_authenticated_and_not_only_a_config_flag_check(self):
+        with patch.object(q,'probe',return_value={'ok':True,'providerTested':True}) as probe:
+            with self.assertRaises(server.HTTPError):server.dispatch('POST','/calculator/test',{})
+            probe.assert_not_called()
+            token=self.login();self.assertTrue(server.dispatch('POST','/calculator/test',{},'Bearer '+token)['providerTested']);probe.assert_called_once()

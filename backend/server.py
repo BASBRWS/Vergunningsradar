@@ -107,13 +107,13 @@ def dispatch(method,path,d,auth='',ip='local'):
         u=get_user(c,auth);account=u['account_id']
         if path=='/calculator/capabilities' and method=='GET':
             return {'configured':quotation_chat.configured(),'mode':'structured-intake','calculations':'browser-fixed-rules'}
-        if path=='/calculator/chat' and method=='POST':
+        if path in ('/calculator/chat','/calculator/test') and method=='POST':
             require_write(u)
             limited(c,'calculator-user:'+u['id'],30)
             limited(c,'calculator-account:'+account,100)
-            audit(c,u['id'],'calculator-chat',account)
+            audit(c,u['id'],'calculator-test' if path.endswith('/test') else 'calculator-chat',account)
             c.commit() # Persist quota before slow external I/O, including provider failures.
-            return quotation_chat.chat(d)
+            return quotation_chat.probe() if path.endswith('/test') else quotation_chat.chat(d)
         if path=='/me' and method=='GET':return {k:u[k] for k in ['id','account_id','company','email','role','readOnly']}
         if path=='/auth/logout' and method=='POST':c.execute('DELETE FROM sessions WHERE hash=?',(hashed(auth[7:]),));return {'ok':True}
         if path=='/leads' and method=='GET':return list_leads(c,account)
