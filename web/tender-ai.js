@@ -1,5 +1,5 @@
-import {TENDER_ROLES,FILE_TYPES,MAX_DOCUMENT_BYTES,MAX_TOTAL_BYTES} from './tender-core.js?v=20261102-blocks';
-import {EVIDENCE_SCHEMA,SOURCE_INSTRUCTIONS,OUTPUT_LIMITS,validateBlockContext,blockInstructions} from './tender-block-contract.js?v=20261102-blocks';
+import {TENDER_ROLES,FILE_TYPES,MAX_DOCUMENT_BYTES,MAX_TOTAL_BYTES} from './tender-core.js?v=20261102-rolprompts';
+import {EVIDENCE_SCHEMA,SOURCE_INSTRUCTIONS,OUTPUT_LIMITS,validateBlockContext,blockInstructions} from './tender-block-contract.js?v=20261102-rolprompts';
 let promise;
 export function loadTenderContract(){return promise ||= fetch('./tender-contract.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('De specialistprompts konden niet worden geladen.');return r.json();}).catch(err=>{promise=null;throw err;});}
 const obj=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
@@ -25,7 +25,7 @@ export function tenderRequestBody(data,model,contract){
  const meta={};for(const k of ['title','client','reference','url','deadline','location']){if(!str(data.meta?.[k],3000))throw Error('Ongeldige opdrachtgegevens.');meta[k]=data.meta[k];}
  const context={role:data.role,metadata:meta,document_register:data.documents.map(d=>({id:d.id,name:d.name,version:d.version||'1'})),previous_analyses:data.prior};
  if(JSON.stringify(context).length>200000)throw Error('De analysecontext is te groot. Verdeel het dossier in kleinere werkpakketten.');
- return {model,store:false,max_output_tokens:12000,instructions:contract.instructions+'\nSpecialistrol, '+selected.name+'\n'+selected.prompt+'\nAanvullende opdracht van de gebruiker, '+(data.prompt||''),input:[{role:'user',content:[{type:'input_text',text:JSON.stringify(context)},...files]}],text:{format:{type:'json_schema',name:'tender_specialist',strict:true,schema:contract.schema}}};
+ return {model,store:false,max_output_tokens:12000,instructions:contract.instructions+'\n'+(contract.base_prompt||'')+'\nSpecialistrol, '+selected.name+'\n'+selected.prompt+'\nAanvullende opdracht van de gebruiker, '+(data.prompt||'')+'\n'+(contract.output_adapter||''),input:[{role:'user',content:[{type:'input_text',text:JSON.stringify(context)},...files]}],text:{format:{type:'json_schema',name:'tender_specialist',strict:true,schema:contract.schema}}};
 }
 
 function blockRequestBody(data,model,contract){
@@ -43,5 +43,5 @@ function blockRequestBody(data,model,contract){
  if(total>MAX_TOTAL_BYTES)throw Error('De bronbestanden zijn samen te groot.');
  const meta={};for(const k of ['title','client','reference','url','deadline','location']){if(!str(data.meta?.[k],3000))throw Error('Ongeldige opdrachtgegevens.');meta[k]=data.meta[k];}
  const role=contract.roles.find(r=>r.id===data.role);if(!role)throw Error('Onbekende specialist.');
- return {model,store:false,max_output_tokens:OUTPUT_LIMITS[data.role==='synthesis'?'synthesis':'review'],instructions:contract.instructions+'\n'+role.prompt+'\n'+blockInstructions(data)+'\nAanvullende specialistprompt, '+(data.prompt||''),input:[{role:'user',content:[{type:'input_text',text:JSON.stringify({role:data.role,metadata:meta,document_register:register,source_range:data.source_range,evidence:data.evidence,previous_analyses:data.notes})}]}],text:{format:{type:'json_schema',name:'tender_specialist',strict:true,schema:contract.schema}}};
+ return {model,store:false,max_output_tokens:OUTPUT_LIMITS[data.role==='synthesis'?'synthesis':'review'],instructions:contract.instructions+'\n'+(contract.base_prompt||'')+'\n'+role.prompt+'\n'+blockInstructions(data)+'\nAanvullende specialistprompt, '+(data.prompt||'')+'\n'+(contract.output_adapter||''),input:[{role:'user',content:[{type:'input_text',text:JSON.stringify({role:data.role,metadata:meta,document_register:register,source_range:data.source_range,evidence:data.evidence,previous_analyses:data.notes})}]}],text:{format:{type:'json_schema',name:'tender_specialist',strict:true,schema:contract.schema}}};
 }

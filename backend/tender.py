@@ -86,7 +86,7 @@ def request_body(data, model):
     context={'role':data['role'],'metadata':meta,'document_register':register,'previous_analyses':prior}
     if len(json.dumps(context,ensure_ascii=False))>200000:raise ValueError('De analysecontext is te groot.')
     return {'model':model,'store':False,'max_output_tokens':12000,
-        'instructions':CONTRACT['instructions']+'\nSpecialistrol, '+role['name']+'\n'+role['prompt']+'\nAanvullende opdracht van de gebruiker, '+data.get('prompt',''),
+        'instructions':CONTRACT['instructions']+'\n'+CONTRACT.get('base_prompt','')+'\nSpecialistrol, '+role['name']+'\n'+role['prompt']+'\nAanvullende opdracht van de gebruiker, '+data.get('prompt','')+'\n'+CONTRACT.get('output_adapter',''),
         'input':[{'role':'user','content':[{'type':'input_text','text':json.dumps(context,ensure_ascii=False)},*files]}],
         'text':{'format':{'type':'json_schema','name':'tender_specialist','strict':True,'schema':CONTRACT['schema']}}}
 
@@ -135,6 +135,6 @@ def block_request_body(data,model):
     instructions=BLOCK_CONTRACT['synthesis_instructions' if role=='synthesis' else 'review_instructions']
     context={'role':role,'metadata':meta,'document_register':register,'source_range':data.get('source_range',''),'evidence':evidence,'previous_analyses':notes}
     return {'model':model,'store':False,'max_output_tokens':BLOCK_CONTRACT['output_limits']['synthesis' if role=='synthesis' else 'review'],
-        'instructions':CONTRACT['instructions']+'\n'+ROLES[role]['prompt']+'\n'+instructions+'\nAanvullende specialistprompt, '+data.get('prompt',''),
+        'instructions':CONTRACT['instructions']+'\n'+CONTRACT.get('base_prompt','')+'\n'+ROLES[role]['prompt']+'\n'+instructions+'\nAanvullende specialistprompt, '+data.get('prompt','')+'\n'+CONTRACT.get('output_adapter',''),
         'input':[{'role':'user','content':[{'type':'input_text','text':json.dumps(context,ensure_ascii=False)}]}],
         'text':{'format':{'type':'json_schema','name':'tender_specialist','strict':True,'schema':CONTRACT['schema']}}}

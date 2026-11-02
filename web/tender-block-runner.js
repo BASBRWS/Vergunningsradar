@@ -1,8 +1,8 @@
-import {TENDER_ROLES,currentRun,signature,uid} from './tender-core.js?v=20261102-blocks';
-import {validateTenderResult,tenderRequestBody,loadTenderContract} from './tender-ai.js?v=20261102-blocks';
-import {BLOCK_VERSION,validateEvidence} from './tender-block-contract.js?v=20261102-blocks';
-import {digest} from './tender-source-blocks.js?v=20261102-blocks';
-import {readBlock,writeBlock} from './tender-files.js?v=20261102-blocks';
+import {TENDER_ROLES,currentRun,signature,uid} from './tender-core.js?v=20261102-rolprompts';
+import {validateTenderResult,tenderRequestBody,loadTenderContract} from './tender-ai.js?v=20261102-rolprompts';
+import {BLOCK_VERSION,validateEvidence} from './tender-block-contract.js?v=20261102-rolprompts';
+import {digest} from './tender-source-blocks.js?v=20261102-rolprompts';
+import {readBlock,writeBlock} from './tender-files.js?v=20261102-rolprompts';
 
 export function processing(t){
  if(t.processing?.version!==BLOCK_VERSION)t.processing={version:BLOCK_VERSION,budget:60000,pages:2,batch:3,spent:0,actualInput:0,actualOutput:0,cached:0,requests:0,epoch:0,sourceDone:0,sourceTotal:0,last:''};

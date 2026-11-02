@@ -5,7 +5,11 @@ export const MAX_DOCUMENT_BYTES=6*1024*1024,MAX_TOTAL_BYTES=12*1024*1024,MAX_DOC
 export const uid=()=>globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;
 export function newTender(){return {meta:{title:'',client:'',reference:'',url:'',deadline:'',location:'',reviewed:false},documents:[],roles:Object.keys(TENDER_ROLES).filter(r=>r!=='synthesis'),prompts:{},runs:{},reviews:{},scopeReviewed:false,scopeText:'',offerText:'',filesAvailable:true};}
 export function ensureTender(p){p.tender ||= newTender();p.flow='tender';return p.tender;}
-export function signature(t){return JSON.stringify({meta:t.meta,documents:t.documents.map(d=>[d.id,d.name,d.size,d.version,d.hash||'']),roles:[...t.roles].sort(),prompts:t.prompts});}
+export function signature(t){return JSON.stringify({meta:t.meta,documents:t.documents.map(d=>[d.id,d.name,d.size,d.version,d.hash||'']),roles:[...t.roles].sort(),prompts:t.prompts,promptVersion:t.promptVersion||'legacy'});}
+export function syncTenderPrompts(t,contract){
+ if(!contract?.version||t.promptVersion===contract.version)return false;
+ t.promptVersion=contract.version;t.scopeReviewed=false;return true;
+}
 export function currentRun(t,role){const run=t.runs[role];return run?.status==='done'&&run.signature===signature(t)?run:null;}
 export function findings(t){return Object.entries(t.runs).flatMap(([role,run])=>(run.result?.findings||[]).map((f,i)=>({...f,id:run.id+'-f'+i,role,current:run.status==='done'&&run.signature===signature(t)})));}
 export function workItems(t){return Object.entries(t.runs).flatMap(([role,run])=>(run.result?.work_items||[]).map((w,i)=>({...w,id:run.id+'-w'+i,role,current:run.status==='done'&&run.signature===signature(t)})));}

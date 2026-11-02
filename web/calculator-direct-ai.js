@@ -1,6 +1,6 @@
 import {CLAUDE_ENDPOINT,CLAUDE_VERSION,claudeRequestBody,claudeReply,claudeError} from './claude-api.js';
-import {loadTenderContract,tenderRequestBody,validateTenderResult} from './tender-ai.js?v=20261102-blocks';
-import {validateEvidence} from './tender-block-contract.js?v=20261102-blocks';
+import {loadTenderContract,tenderRequestBody,validateTenderResult} from './tender-ai.js?v=20261102-rolprompts';
+import {validateEvidence} from './tender-block-contract.js?v=20261102-rolprompts';
 import {GUIDES,PREPARATION_KINDS} from './intake-guide.js';
 
 const ENDPOINT='https://api.openai.com/v1/responses';
