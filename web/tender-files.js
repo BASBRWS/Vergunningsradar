@@ -11,3 +11,6 @@ export async function getDocument(id){const row=await operation('readonly',s=>s.
 export async function hasDocument(id){return Boolean(await operation('readonly',s=>s.getKey(id)));}
 export async function deleteDocument(id){await operation('readwrite',s=>s.delete(id));}
 export async function documentInputs(documents){return Promise.all(documents.map(async d=>{const blob=await getDocument(d.id);const file_data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('Bestand uitlezen is niet gelukt.'));reader.readAsDataURL(new Blob([blob],{type:d.type}));});return {...d,file_data};}));}
+// Checkpoints share the transactional IndexedDB store; original files keep their own keys.
+export async function readBlock(key){return (await operation('readonly',s=>s.get('block:'+key)))?.result||null;}
+export async function writeBlock(key,result){await operation('readwrite',s=>s.put({id:'block:'+key,result}));}

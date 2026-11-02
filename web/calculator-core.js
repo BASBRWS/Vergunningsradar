@@ -1,9 +1,9 @@
-import {MAX_CATALOG_ITEMS} from './installation-catalog.js?v=20261102-claude';
+import {MAX_CATALOG_ITEMS} from './installation-catalog.js?v=20261102-blocks';
 import {catalogMetadata} from './professional-catalog.js';
-import {tenderChecklist,importTender} from './tender-core.js';
-import {validateTenderResult} from './tender-ai.js';
+import {tenderChecklist,importTender} from './tender-core.js?v=20261102-blocks';
+import {validateTenderResult} from './tender-ai.js?v=20261102-blocks';
 import {GUIDES,PREPARATION_KINDS,isUncertainAnswer,preparationFor,preparationText} from './intake-guide.js';
-import {INSTALLATION_PRODUCTS} from './installation-catalog.js?v=20261102-claude';
+import {INSTALLATION_PRODUCTS} from './installation-catalog.js?v=20261102-blocks';
 // All amounts in the calculation result are integer euro cents.
 export const FIELDS = [
   ['trade','Installatiegebied',8,true,'Wat wil je laten installeren of aanpassen, bijvoorbeeld elektra, verwarming, water of ventilatie?'],
@@ -186,6 +186,6 @@ export function validateProject(p){
     return {id:id(),field:x.field,label:FIELDS.find(f=>f.id===x.field).label,kind:x.kind,note:x.note,owner:String(x.owner||'Installateur').slice(0,100),date:typeof x.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)?x.date:'',accepted:false,resolved:false,resolution:x.resolution};
    });
   }
-  if(p.flow==='tender'){clean.flow='tender';clean.tender=importTender(p.tender);for(const [role,run] of Object.entries(clean.tender.runs))if(run.result)validateTenderResult(run.result,clean.tender.documents,role);}
+  if(p.flow==='tender'){clean.flow='tender';clean.tender=importTender(p.tender);for(const [role,run] of Object.entries(clean.tender.runs))if(run.result)validateTenderResult(run.result,clean.tender.documents,role,{aggregate:true});}
   clean.asked=nextIntakeField(clean)?.id||'';return clean;
 }

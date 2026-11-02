@@ -31,7 +31,7 @@ export function validateDocument(file,current){
 }
 export function validTenderUrl(value){if(!value)return true;try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password&&(u.hostname==='tenderned.nl'||u.hostname.endsWith('.tenderned.nl'));}catch{return false;}}
 export function importTender(raw){
- if(!raw||JSON.stringify(raw).length>700000)throw Error('Ongeldig of te groot aanbestedingsdossier.');
+ if(!raw||JSON.stringify(raw).length>3500000)throw Error('Ongeldig of te groot aanbestedingsdossier.');
  const t=newTender();for(const k of Object.keys(t.meta)){if(k==='reviewed')continue;if(typeof raw.meta?.[k]!=='string'||raw.meta[k].length>3000)throw Error('Ongeldige opdrachtgegevens.');t.meta[k]=raw.meta[k];}
  if(!validTenderUrl(t.meta.url))throw Error('Gebruik een HTTPS link op TenderNed.');
  if(!Array.isArray(raw.documents)||raw.documents.length>10)throw Error('Ongeldige documentenlijst.');

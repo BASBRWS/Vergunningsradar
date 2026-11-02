@@ -1,12 +1,12 @@
 import {CATALOG_SOURCES,PRICE_TYPES,articlePriceLabel} from './professional-catalog.js';
 import {serializeVault,decodeCatalog} from './catalog-storage.js';
-import {createTenderWorkspace} from './tender-workspace.js?v=20261102-claude';
-import {ensureTender} from './tender-core.js';
-import {createDirectAIClient} from './calculator-direct-ai.js?v=20261102-claude';
+import {createTenderWorkspace} from './tender-workspace.js?v=20261102-blocks';
+import {ensureTender} from './tender-core.js?v=20261102-blocks';
+import {createDirectAIClient} from './calculator-direct-ai.js?v=20261102-blocks';
 import {GUIDES,PREPARATION_KINDS,isUncertainAnswer,preparationFor,preparationText} from './intake-guide.js';
 import {connectionState,friendlyConnectionError} from './calculator-connection.js';
-import {INSTALLATION_PRODUCTS,INSTALLATION_CATALOG_VERSION,mergeInstallationCatalog,filterCatalog,MAX_CATALOG_ITEMS} from './installation-catalog.js?v=20261102-claude';
-import {FIELDS,CATEGORIES,DEFAULT_SETTINGS,CATALOG,money,cents,id,newProject,known,completeness,phase,nextField,invalidate,setField,confirmFields,calculate,releaseIssues,localReply,generateDocuments,parseCSV,validateProject,nextIntakeField,deferQuestion,upsertPreparation,resolvePreparation} from './calculator-core.js?v=20261102-claude';
+import {INSTALLATION_PRODUCTS,INSTALLATION_CATALOG_VERSION,mergeInstallationCatalog,filterCatalog,MAX_CATALOG_ITEMS} from './installation-catalog.js?v=20261102-blocks';
+import {FIELDS,CATEGORIES,DEFAULT_SETTINGS,CATALOG,money,cents,id,newProject,known,completeness,phase,nextField,invalidate,setField,confirmFields,calculate,releaseIssues,localReply,generateDocuments,parseCSV,validateProject,nextIntakeField,deferQuestion,upsertPreparation,resolvePreparation} from './calculator-core.js?v=20261102-blocks';
 const $=s=>document.querySelector(s), e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const KEY='vr-offertewerkplaats-v1';let tab='gesprek',busy=false,noticeTimer,ai=false,aiStatus='Nog niet verbonden',consent=false,providerTested=false,catalogSearch='',catalogGroup='',catalogBrand='',catalogDiscipline='',catalogPrice='',catalogPage=0;
 const CATALOG_PAGE_SIZE=50;
@@ -18,7 +18,7 @@ if(!Array.isArray(vault.catalogPacks)||!vault.catalogPacks.includes(INSTALLATION
  catch(err){setTimeout(()=>notice(err.message),200);}
 }
 const project=()=>vault.projects.find(p=>p.id===vault.active);
-const tenderWorkspace=createTenderWorkspace({isTender:()=>project()?.flow==='tender',render,notice,persist,invalidate,setBusy:value=>{busy=value;},busy:()=>busy,aiReady:()=>providerTested,providerLabel:()=>aiMode==='direct'?providerLabel():serverProvider==='anthropic'?'Claude':serverProvider==='openai'?'OpenAI':'AI dienst',analyze:data=>aiMode==='direct'?directAI.analyzeTender(data):request('/calculator/tender','POST',data),dialog:showDialog,download,catalog:()=>vault.catalog,configure:()=>{tab='configuratie';render();}});
+const tenderWorkspace=createTenderWorkspace({isTender:()=>project()?.flow==='tender',render,notice,persist,invalidate,setBusy:value=>{busy=value;},busy:()=>busy,aiReady:()=>providerTested,providerLabel:()=>aiMode==='direct'?providerLabel():serverProvider==='anthropic'?'Claude':serverProvider==='openai'?'OpenAI':'AI dienst',analyze:(data,onUsage)=>aiMode==='direct'?directAI.analyzeTender(data,onUsage):request('/calculator/tender','POST',data),dialog:showDialog,download,catalog:()=>vault.catalog,configure:()=>{tab='configuratie';render();}});
 const apiBase=(window.VR_CONFIG?.apiBase||'').replace(/\/$/,'');
 const directAI=createDirectAIClient();let aiMode=apiBase?'server':'direct',directModel='',pendingDirectKey='',aiProvider='anthropic',serverProvider='';
 const providerLabel=()=>aiProvider==='anthropic'?'Claude':'OpenAI';
@@ -27,7 +27,7 @@ addEventListener('pagehide',()=>{directAI.clear();pendingDirectKey='';if($('#dir
 addEventListener('pageshow',ev=>{if(ev.persisted){aiStatus='De sleutel is gewist na het verlaten van de pagina. Verbind opnieuw om AI te gebruiken.';render();}});
 for(const p of vault.projects){p.preparation ||= [];p.intakeFollowup ||= null;}
 function notice(text){$('#notice').textContent=text;$('#notice').className='show';clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>$('#notice').className='',6000);}
-function persist(){project().updated=new Date().toISOString();try{localStorage.setItem(KEY,serializeVault(vault,CATALOG));$('.save-status')?.replaceChildren(document.createTextNode('Opgeslagen in deze browser'));}catch{notice('Opslaan in de browser mislukt. Exporteer je project om werk te bewaren.');}}
+function persist(){project().updated=new Date().toISOString();try{localStorage.setItem(KEY,serializeVault(vault,CATALOG));$('.save-status')?.replaceChildren(document.createTextNode('Opgeslagen in deze browser'));return true;}catch{notice('Opslaan in de browser mislukt. Exporteer je project om werk te bewaren.');return false;}}
 function greeting(p){if(!p.messages.length){p.messages.push({role:'assistant',phase:'Frontoffice',text:'Welkom bij de offertewerkplaats. Ik verzamel eerst je wensen. Daarna werken we de opdracht, kosten en uitvoering uit.\n\n'+FIELDS[0].question});p.asked='trade';}}
 function opts(obj,value){return Object.entries(obj).map(([k,label])=>`<option value="${e(k)}" ${k===value?'selected':''}>${e(label)}</option>`).join('');}
 function button(label,action,kind='secondary'){return `<button class="btn ${kind}" data-action="${action}">${label}</button>`;}
@@ -144,7 +144,7 @@ function bindConfig(p){
  $('#settings-form').onsubmit=ev=>{ev.preventDefault();const fd=new FormData(ev.target),s={...p.settings};for(const k of Object.keys(DEFAULT_SETTINGS))s[k]=typeof DEFAULT_SETTINGS[k]==='number'?Number(fd.get(k)):String(fd.get(k));try{calculate(p.lines,s);if(s.validDays<1||s.validDays>365)throw Error('Geldigheid moet 1 tot 365 dagen zijn.');p.settings=s;if($('#save-defaults').checked)vault.defaults={...s};invalidate(p);persist();render();notice('Rekenregels opgeslagen.');}catch(err){notice(err.message);}};
  $('#ai-consent').onchange=ev=>{consent=ev.target.checked;if(!consent){ai=false;aiStatus='AI uitgeschakeld, toestemming ingetrokken.';}else if(providerTested){ai=true;aiStatus='AI dienst getest en toestemming vastgelegd. Je kunt nu een vrij gesprek voeren.';}render();};
  $('#catalog-import').onchange=async ev=>{const f=ev.target.files[0];if(!f)return;try{if(f.size>10*1024*1024)throw Error('CSV mag maximaal 10 MB zijn.');const rows=parseCSV(await f.text());showDialog('Catalogus vervangen',`<p>Je vervangt de catalogus door ${rows.length} regels. Bestaande calculaties blijven gelijk.</p>`,()=>{vault.catalog=rows;persist();render();notice('Catalogus geïmporteerd.');});}catch(err){notice(err.message);}};
- $('#project-import').onchange=async ev=>{const f=ev.target.files[0];if(!f)return;try{if(f.size>1e6)throw Error('Projectbestand mag maximaal 1 MB zijn.');const p=validateProject(JSON.parse(await f.text()));if(vault.projects.length>=50)throw Error('Maximaal 50 lokale projecten.');vault.projects.push(p);vault.active=p.id;persist();tab=p.flow==='tender'?'tender':'gesprek';render();if(p.flow==='tender')tenderWorkspace.checkFiles(p);notice('Project geïmporteerd. Bevestigingen en controles zijn ingetrokken.');}catch(err){notice(err.message||'Import mislukt.');}};
+ $('#project-import').onchange=async ev=>{const f=ev.target.files[0];if(!f)return;try{if(f.size>4e6)throw Error('Projectbestand mag maximaal 4 MB zijn.');const p=validateProject(JSON.parse(await f.text()));if(vault.projects.length>=50)throw Error('Maximaal 50 lokale projecten.');vault.projects.push(p);vault.active=p.id;persist();tab=p.flow==='tender'?'tender':'gesprek';render();if(p.flow==='tender')tenderWorkspace.checkFiles(p);notice('Project geïmporteerd. Bevestigingen en controles zijn ingetrokken.');}catch(err){notice(err.message||'Import mislukt.');}};
 
 }
 function lock(state){document.querySelectorAll('button,select,input,textarea').forEach(b=>b.disabled=state);}

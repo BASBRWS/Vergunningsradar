@@ -1,5 +1,6 @@
 import {CLAUDE_ENDPOINT,CLAUDE_VERSION,claudeRequestBody,claudeReply,claudeError} from './claude-api.js';
-import {loadTenderContract,tenderRequestBody,validateTenderResult} from './tender-ai.js';
+import {loadTenderContract,tenderRequestBody,validateTenderResult} from './tender-ai.js?v=20261102-blocks';
+import {validateEvidence} from './tender-block-contract.js?v=20261102-blocks';
 import {GUIDES,PREPARATION_KINDS} from './intake-guide.js';
 
 const ENDPOINT='https://api.openai.com/v1/responses';
@@ -65,7 +66,7 @@ export function createDirectAIClient(fetcher=(...args)=>fetch(...args)){
   if(typeof nextModel!=='string'||!/^[-a-zA-Z0-9_.:]{1,100}$/.test(nextModel.trim()))throw Error('Vul de modelnaam uit jouw API project in.');
   generation++;controller?.abort();controller=null;key=candidate;model=nextModel.trim();provider=nextProvider;tested=false;
  }
- async function execute(body,validate){
+ async function execute(body,validate,onUsage){
   if(!key)throw Error('Vul eerst jouw eigen API sleutel in bij Configuratie.');
   if(controller)throw Error('Er wordt al een AI aanvraag verwerkt.');
   const selected=provider,claude=selected==='anthropic',requestBody=claude?claudeRequestBody(body):body;
@@ -77,6 +78,7 @@ export function createDirectAIClient(fetcher=(...args)=>fetch(...args)){
    const raw=await response.text();if(raw.length>600000)throw Error('Het AI antwoord is te groot. Probeer een korter bericht.');
    let value;try{value=JSON.parse(raw);}catch{throw Error((claude?'Claude':'OpenAI')+' gaf geen geldig API antwoord. Probeer later opnieuw.');}
    if(!response.ok)throw Error(claude?claudeError(response.status):providerError(response.status,value?.error?.code));
+   if(value.usage&&onUsage){const n=v=>Number.isSafeInteger(v)&&v>=0?v:0,u=value.usage;onUsage({input:n(u.input_tokens)+(claude?n(u.cache_creation_input_tokens)+n(u.cache_read_input_tokens):0),output:n(u.output_tokens),cached:claude?n(u.cache_read_input_tokens):n(u.input_tokens_details?.cached_tokens)});}
    if(started!==generation||!key)throw Error('De sleutel is gewist. Verbind opnieuw om verder te gaan.');
    if(claude)return validate(claudeReply(value));
    if(!object(value)||!Array.isArray(value.output))throw Error((claude?'Claude':'OpenAI')+' gaf geen geldig API antwoord. Probeer later opnieuw.');
@@ -88,7 +90,7 @@ export function createDirectAIClient(fetcher=(...args)=>fetch(...args)){
   }finally{if(started===generation)controller=null;}
  }
  const call=async data=>{if(!key)throw Error('Vul eerst jouw eigen API sleutel in bij Configuratie.');return execute(directRequestBody(data,model),validateDirectReply);};
- async function analyzeTender(data){if(!tested)throw Error('Test eerst jouw API verbinding bij Configuratie.');const contract=await loadTenderContract();return execute(tenderRequestBody(data,model,contract),r=>validateTenderResult(r,data.documents,data.role));}
+ async function analyzeTender(data,onUsage){if(!tested)throw Error('Test eerst jouw API verbinding bij Configuratie.');const contract=await loadTenderContract();return execute(tenderRequestBody(data,model,contract),r=>data.stage==='extract'?validateEvidence(r,data.documents):validateTenderResult(r,data.documents,data.role),onUsage);}
  async function test(){
   tested=false;const result=await call({message:'Verbindingscontrole zonder klantgegevens. Geef een kort antwoord, geen dossierwijzigingen en geen voorbereidingsvoorstellen.',fields:Object.fromEntries(FIELD_IDS.map(f=>[f,{value:'',confirmed:false}])),messages:[],preparation:[],asked:''});tested=true;return {ok:true,providerTested:true};
  }
