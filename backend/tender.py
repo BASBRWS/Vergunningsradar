@@ -132,9 +132,11 @@ def block_request_body(data,model):
     evidence=validate_passages(data.get('evidence'),docs);notes=data.get('notes')
     if not isinstance(notes,list) or len(notes)>6 or any(not isinstance(n,dict) or set(n)!={'role','text'} or n['role'] not in ROLES or not text(n['text'],2400) for n in notes):raise ValueError('Ongeldige samenvattingen van specialisten.')
     if len(json.dumps({'evidence':evidence,'notes':notes},ensure_ascii=False,separators=(',',':')))>26000:raise ValueError('Dit blok bevat te veel context.')
+    answer_tokens=data.get('answer_tokens',BLOCK_CONTRACT['output_limits']['synthesis' if role=='synthesis' else 'review'])
+    if type(answer_tokens) is not int or answer_tokens not in (6000,8000,12000):raise ValueError('Ongeldige antwoordlimiet.')
     instructions=BLOCK_CONTRACT['synthesis_instructions' if role=='synthesis' else 'review_instructions']
     context={'role':role,'metadata':meta,'document_register':register,'source_range':data.get('source_range',''),'evidence':evidence,'previous_analyses':notes}
-    return {'model':model,'store':False,'max_output_tokens':BLOCK_CONTRACT['output_limits']['synthesis' if role=='synthesis' else 'review'],
+    return {'model':model,'store':False,'max_output_tokens':answer_tokens,
         'instructions':CONTRACT['instructions']+'\n'+CONTRACT.get('base_prompt','')+'\n'+ROLES[role]['prompt']+'\n'+instructions+'\nAanvullende specialistprompt, '+data.get('prompt','')+'\n'+CONTRACT.get('output_adapter',''),
         'input':[{'role':'user','content':[{'type':'input_text','text':json.dumps(context,ensure_ascii=False)}]}],
         'text':{'format':{'type':'json_schema','name':'tender_specialist','strict':True,'schema':CONTRACT['schema']}}}

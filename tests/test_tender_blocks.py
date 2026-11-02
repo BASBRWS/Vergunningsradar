@@ -19,7 +19,7 @@ class TenderBlockTests(unittest.TestCase):
         d={**data(),'stage':'review','source_range':'deel 1 van 1','evidence':evidence()['passages'],'notes':[]}
         del d['documents'][0]['file_data']
         body=tender.request_body(d,'model')
-        self.assertEqual(body['max_output_tokens'],2800)
+        self.assertEqual(body['max_output_tokens'],6000)
         self.assertEqual(len(body['input'][0]['content']),1)
         self.assertNotIn('file_data',json.dumps(body))
         with patch.object(tender.ai_provider,'configured',return_value=True),patch.object(tender.ai_provider,'complete',return_value=result()):self.assertEqual(tender.analyze(d),result())

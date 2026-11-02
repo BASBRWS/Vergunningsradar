@@ -3,10 +3,15 @@ import base64
 import binascii
 import json
 import os
+import re
 import urllib.error
 import urllib.request
 
 CLAUDE_VERSION='2026-10-21'
+
+class AIResponseError(ValueError):
+    def __init__(self,code,message,stop_reason=''):
+        super().__init__(message);self.code=code;self.stop_reason=stop_reason
 
 def provider():
     value=os.environ.get('AI_PROVIDER','openai').strip().lower()
@@ -42,13 +47,18 @@ def claude_body(body):
                 else:raise ValueError('Claude leest in deze koppeling PDF, TXT en MD. Zet DOCX om naar PDF en voeg dat bestand toe.')
                 blocks.append({'type':'document','title':part['filename'],'source':source})
     if not blocks:raise ValueError('Lege Claude aanvraag.')
-    return {'model':body['model'],'max_tokens':body['max_output_tokens'],'system':body['instructions'],
+    effort={'effort':'low' if body['text']['format'].get('name')=='tender_source_block' else 'medium'} if re.match(r'^claude-opus-5-5($|-)',body['model']) else {}
+    reuse=body['text']['format'].get('name')=='tender_specialist' and all(b['type']=='text' for b in blocks)
+    system=[{'type':'text','text':body['instructions'],'cache_control':{'type':'ephemeral'}}] if reuse else body['instructions']
+    return {'model':body['model'],'max_tokens':body['max_output_tokens'],'system':system,
         'messages':[{'role':'user','content':blocks}],
-        'output_config':{'format':{'type':'json_schema','schema':body['text']['format']['schema']}}}
+        'output_config':{**effort,'format':{'type':'json_schema','schema':body['text']['format']['schema']}}}
 
 def parse_claude(value):
     if not isinstance(value,dict) or value.get('type')!='message' or not isinstance(value.get('content'),list):raise ValueError('Claude gaf geen geldig API antwoord.')
     if value.get('stop_reason')=='refusal':raise ValueError('Claude heeft geen analyseantwoord gegeven. Formuleer de opdracht anders.')
+    if value.get('stop_reason')=='max_tokens':raise AIResponseError('AI_OUTPUT_LIMIT','Claude bereikte de antwoordlimiet van dit blok, inclusief denkwerk. Het onvolledige antwoord is niet overgenomen.','max_tokens')
+    if value.get('stop_reason')=='model_context_window_exceeded':raise AIResponseError('AI_CONTEXT_LIMIT','Dit analyseblok past niet in het contextvenster van Claude.','model_context_window_exceeded')
     if value.get('stop_reason')!='end_turn':raise ValueError('Het Claude antwoord is niet afgerond. Verdeel het dossier in kleinere werkpakketten.')
     try:return json.loads(''.join(p.get('text','') for p in value['content'] if isinstance(p,dict) and p.get('type')=='text'))
     except (ValueError,TypeError) as exc:raise ValueError('Claude gaf geen bruikbaar gestructureerd antwoord.') from exc
@@ -66,6 +76,7 @@ def complete(body,timeout=90,limit=600000):
         if len(raw)>limit:raise ValueError('Het AI antwoord is te groot.')
         value=json.loads(raw)
     except (urllib.error.URLError,TimeoutError,OSError) as exc:
+        if isinstance(exc,TimeoutError) or isinstance(getattr(exc,'reason',None),TimeoutError):raise AIResponseError('AI_TIMEOUT','De AI aanvraag duurde te lang. Afgeronde blokken blijven bewaard.') from exc
         raise ValueError('De AI dienst antwoordt niet. Controleer serverconfiguratie, modeltoegang en API tegoed.') from exc
     if claude:return parse_claude(value)
     if not isinstance(value,dict) or value.get('status')!='completed':raise ValueError('Het AI antwoord is niet afgerond. Probeer een korter bericht of een kleiner werkpakket.')

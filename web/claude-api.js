@@ -21,11 +21,16 @@ export function claudeRequestBody(body){
   }
  }
  if(!blocks.length||typeof body.instructions!=='string'||!body.text?.format?.schema)throw Error('Ongeldige Claude aanvraag.');
- return {model:body.model,max_tokens:body.max_output_tokens,system:body.instructions,messages:[{role:'user',content:blocks}],output_config:{format:{type:'json_schema',schema:body.text.format.schema}}};
+ const effort=/^claude-opus-5-5(?:$|-)/.test(body.model)?{effort:body.text.format.name==='tender_source_block'?'low':'medium'}:{};
+ const reuse=body.text.format.name==='tender_specialist'&&blocks.every(b=>b.type==='text');
+ const system=reuse?[{type:'text',text:body.instructions,cache_control:{type:'ephemeral'}}]:body.instructions;
+ return {model:body.model,max_tokens:body.max_output_tokens,system,messages:[{role:'user',content:blocks}],output_config:{...effort,format:{type:'json_schema',schema:body.text.format.schema}}};
 }
 export function claudeReply(value){
  if(!value||value.type!=='message'||!Array.isArray(value.content))throw Error('Claude gaf geen geldig API antwoord.');
  if(value.stop_reason==='refusal')throw Error('Claude heeft geen analyseantwoord gegeven. Formuleer de opdracht anders.');
+ if(value.stop_reason==='max_tokens')throw Object.assign(Error('Claude bereikte de antwoordlimiet van dit blok, inclusief denkwerk. Het onvolledige antwoord is niet overgenomen.'),{code:'AI_OUTPUT_LIMIT',stopReason:'max_tokens'});
+ if(value.stop_reason==='model_context_window_exceeded')throw Object.assign(Error('Dit analyseblok past niet in het contextvenster van Claude.'),{code:'AI_CONTEXT_LIMIT',stopReason:'model_context_window_exceeded'});
  if(value.stop_reason!=='end_turn')throw Error('Het Claude antwoord is niet afgerond. Verdeel het dossier in kleinere werkpakketten of controleer het gekozen model.');
  const output=value.content.filter(p=>p?.type==='text').map(p=>p.text||'').join('');
  try{return JSON.parse(output);}catch{throw Error('Claude gaf geen bruikbaar gestructureerd antwoord. Er is niets in het dossier aangepast.');}

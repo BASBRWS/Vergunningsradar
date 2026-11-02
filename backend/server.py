@@ -209,6 +209,7 @@ class Handler(BaseHTTPRequestHandler):
             result=accept_invite(data) if path=='/auth/invite' and self.command=='POST' else dispatch(self.command,path,data,self.headers.get('Authorization',''),self.client_address[0])
             self.send_json(200,result)
         except HTTPError as exc:self.send_json(exc.status,{'error':exc.message})
+        except ai_provider.AIResponseError as exc:self.send_json(400,{'error':str(exc),'code':exc.code,'stop_reason':exc.stop_reason})
         except (ValueError,KeyError,TypeError) as exc:self.send_json(400,{'error':str(exc) if isinstance(exc,ValueError) else 'Ongeldige aanvraag.'})
         except Exception as exc:log.error('API fout %s',type(exc).__name__);self.send_json(503,{'error':'De dienst is tijdelijk niet beschikbaar. Probeer later opnieuw.'})
     do_GET=handle_request;do_POST=handle_request;do_PUT=handle_request;do_PATCH=handle_request;do_OPTIONS=handle_request

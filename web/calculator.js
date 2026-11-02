@@ -1,13 +1,13 @@
-import {loadModelPreferences,saveModelPreferences,rememberModel} from './ai-model-preferences.js?v=20261102-rolprompts';
+import {loadModelPreferences,saveModelPreferences,rememberModel} from './ai-model-preferences.js?v=20261102-antwoordherstel';
 import {CATALOG_SOURCES,PRICE_TYPES,articlePriceLabel} from './professional-catalog.js';
 import {serializeVault,decodeCatalog} from './catalog-storage.js';
-import {createTenderWorkspace} from './tender-workspace.js?v=20261102-rolprompts';
-import {ensureTender} from './tender-core.js?v=20261102-rolprompts';
-import {createDirectAIClient} from './calculator-direct-ai.js?v=20261102-rolprompts';
+import {createTenderWorkspace} from './tender-workspace.js?v=20261102-antwoordherstel';
+import {ensureTender} from './tender-core.js?v=20261102-antwoordherstel';
+import {createDirectAIClient} from './calculator-direct-ai.js?v=20261102-antwoordherstel';
 import {GUIDES,PREPARATION_KINDS,isUncertainAnswer,preparationFor,preparationText} from './intake-guide.js';
 import {connectionState,friendlyConnectionError} from './calculator-connection.js';
-import {INSTALLATION_PRODUCTS,INSTALLATION_CATALOG_VERSION,mergeInstallationCatalog,filterCatalog,MAX_CATALOG_ITEMS} from './installation-catalog.js?v=20261102-rolprompts';
-import {FIELDS,CATEGORIES,DEFAULT_SETTINGS,CATALOG,money,cents,id,newProject,known,completeness,phase,nextField,invalidate,setField,confirmFields,calculate,releaseIssues,localReply,generateDocuments,parseCSV,validateProject,nextIntakeField,deferQuestion,upsertPreparation,resolvePreparation} from './calculator-core.js?v=20261102-rolprompts';
+import {INSTALLATION_PRODUCTS,INSTALLATION_CATALOG_VERSION,mergeInstallationCatalog,filterCatalog,MAX_CATALOG_ITEMS} from './installation-catalog.js?v=20261102-antwoordherstel';
+import {FIELDS,CATEGORIES,DEFAULT_SETTINGS,CATALOG,money,cents,id,newProject,known,completeness,phase,nextField,invalidate,setField,confirmFields,calculate,releaseIssues,localReply,generateDocuments,parseCSV,validateProject,nextIntakeField,deferQuestion,upsertPreparation,resolvePreparation} from './calculator-core.js?v=20261102-antwoordherstel';
 const $=s=>document.querySelector(s), e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const KEY='vr-offertewerkplaats-v1';let tab='gesprek',busy=false,noticeTimer,ai=false,aiStatus='Nog niet verbonden',consent=false,providerTested=false,catalogSearch='',catalogGroup='',catalogBrand='',catalogDiscipline='',catalogPrice='',catalogPage=0;
 const CATALOG_PAGE_SIZE=50;
@@ -158,7 +158,7 @@ async function request(path,method='GET',data){
  const res=await fetch(apiBase+path,{method,signal:AbortSignal.timeout(path==='/calculator/tender'?110000:65000),headers:{'Content-Type':'application/json',Authorization:'Bearer '+(sessionStorage.getItem('vr-session')||'')},...(data?{body:JSON.stringify(data)}:{})});
  if(res.status===401)throw Error('De AI server vereist een geldige sessie. Log opnieuw in via Vergunningradar.');
  const r=await res.json().catch(()=>{throw Error('De server gaf geen geldig API antwoord. Controleer of het ingestelde adres naar de API verwijst.');});
- if(!res.ok)throw Error(r.error||'De aanvraag aan de AI server is niet gelukt.');return r;
+ if(!res.ok)throw Object.assign(Error(r.error||'De aanvraag aan de AI server is niet gelukt.'),{code:['AI_OUTPUT_LIMIT','AI_CONTEXT_LIMIT','AI_TIMEOUT'].includes(r.code)?r.code:'AI_ERROR',stopReason:typeof r.stop_reason==='string'?r.stop_reason:''});return r;
 }
 function showDialog(title,html,handler,label='Bevestigen'){
  const d=$('#dialog');d.innerHTML=`<h2>${e(title)}</h2>${html}<div class="bottom-actions"><button class="btn secondary" id="dialog-cancel">Annuleren</button><button class="btn" id="dialog-ok">${e(label)}</button></div>`;d.showModal();$('#dialog-cancel').onclick=()=>d.close();$('#dialog-ok').onclick=async()=>{d.close();await handler();};

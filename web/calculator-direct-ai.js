@@ -1,6 +1,6 @@
-import {CLAUDE_ENDPOINT,CLAUDE_VERSION,claudeRequestBody,claudeReply,claudeError} from './claude-api.js';
-import {loadTenderContract,tenderRequestBody,validateTenderResult} from './tender-ai.js?v=20261102-rolprompts';
-import {validateEvidence} from './tender-block-contract.js?v=20261102-rolprompts';
+import {CLAUDE_ENDPOINT,CLAUDE_VERSION,claudeRequestBody,claudeReply,claudeError} from './claude-api.js?v=20261102-antwoordherstel';
+import {loadTenderContract,tenderRequestBody,validateTenderResult} from './tender-ai.js?v=20261102-antwoordherstel';
+import {validateEvidence} from './tender-block-contract.js?v=20261102-antwoordherstel';
 import {GUIDES,PREPARATION_KINDS} from './intake-guide.js';
 
 const ENDPOINT='https://api.openai.com/v1/responses';
@@ -74,7 +74,7 @@ export function createDirectAIClient(fetcher=(...args)=>fetch(...args)){
   try{
    let response;
    try{response=await fetcher(claude?CLAUDE_ENDPOINT:ENDPOINT,{method:'POST',mode:'cors',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer',cache:'no-store',signal,headers:claude?{'Content-Type':'application/json','x-api-key':key,'anthropic-version':CLAUDE_VERSION,'anthropic-dangerous-direct-browser-access':'true'}:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:JSON.stringify(requestBody)});}
-   catch(err){if(err?.name==='AbortError'||err?.name==='TimeoutError')throw Error('De AI aanvraag is gestopt of duurde te lang. Probeer opnieuw.');throw Error('De browser bereikt '+(claude?'Claude':'OpenAI')+' niet. Controleer jouw internetverbinding en browser- of netwerkblokkades.');}
+   catch(err){if(err?.name==='AbortError'||err?.name==='TimeoutError')throw Object.assign(Error('De AI aanvraag is gestopt of duurde te lang. Afgeronde blokken blijven bewaard.'),{code:'AI_TIMEOUT'});throw Error('De browser bereikt '+(claude?'Claude':'OpenAI')+' niet. Controleer jouw internetverbinding en browser- of netwerkblokkades.');}
    const raw=await response.text();if(raw.length>600000)throw Error('Het AI antwoord is te groot. Probeer een korter bericht.');
    let value;try{value=JSON.parse(raw);}catch{throw Error((claude?'Claude':'OpenAI')+' gaf geen geldig API antwoord. Probeer later opnieuw.');}
    if(!response.ok)throw Error(claude?claudeError(response.status):providerError(response.status,value?.error?.code));
@@ -87,7 +87,7 @@ export function createDirectAIClient(fetcher=(...args)=>fetch(...args)){
    let output='';for(const item of value.output)if(object(item)&&item.type==='message'&&Array.isArray(item.content))for(const part of item.content){if(!object(part))continue;if(part.type==='refusal')throw Error('Het model heeft geen intakeantwoord gegeven. Formuleer jouw vraag anders.');if(part.type==='output_text')output+=part.text||'';}
    let parsed;try{parsed=JSON.parse(output);}catch{throw Error('De AI gaf geen bruikbaar intakeantwoord. Er is niets in het dossier aangepast.');}
    return validate(parsed);
-  }finally{if(started===generation)controller=null;}
+  }catch(err){if(err?.name==='AbortError'||err?.name==='TimeoutError')throw Object.assign(Error('De AI aanvraag duurde te lang. Afgeronde blokken blijven bewaard.'),{code:'AI_TIMEOUT'});throw err;}finally{if(started===generation)controller=null;}
  }
  const call=async data=>{if(!key)throw Error('Vul eerst jouw eigen API sleutel in bij Configuratie.');return execute(directRequestBody(data,model),validateDirectReply);};
  async function analyzeTender(data,onUsage){if(!tested)throw Error('Test eerst jouw API verbinding bij Configuratie.');const contract=await loadTenderContract();return execute(tenderRequestBody(data,model,contract),r=>data.stage==='extract'?validateEvidence(r,data.documents):validateTenderResult(r,data.documents,data.role),onUsage);}

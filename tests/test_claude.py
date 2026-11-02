@@ -11,6 +11,16 @@ def mock_response(value):
     response=MagicMock();response.__enter__.return_value.read.return_value=json.dumps(value).encode();return response
 
 class ClaudeTests(unittest.TestCase):
+    def test_truncation_has_a_machine_readable_cause_and_never_accepts_partial_json(self):
+        with self.assertRaises(ai_provider.AIResponseError) as error:ai_provider.parse_claude({**envelope(tender_result()),'stop_reason':'max_tokens'})
+        self.assertEqual(error.exception.code,'AI_OUTPUT_LIMIT');self.assertEqual(error.exception.stop_reason,'max_tokens')
+    def test_opus_review_uses_reasoning_room_and_reuses_static_prompts(self):
+        d={**tender_data(),'stage':'review','source_range':'deel 1','evidence':[],'notes':[]}
+        body=ai_provider.claude_body(tender.request_body(d,'claude-opus-5-5'))
+        self.assertEqual(body['max_tokens'],6000);self.assertEqual(body['output_config']['effort'],'medium');self.assertEqual(body['system'][0]['cache_control'],{'type':'ephemeral'})
+        d['answer_tokens']=12000;self.assertEqual(tender.request_body(d,'claude-opus-5-5')['max_output_tokens'],12000)
+        d['answer_tokens']=1000000
+        with self.assertRaises(ValueError):tender.request_body(d,'claude-opus-5-5')
     def test_configuration_selects_claude_without_fallback_or_secret_in_capabilities(self):
         with patch.dict(os.environ,ENV):
             self.assertTrue(quotation_chat.configured());self.assertEqual(ai_provider.model(),'user-claude-model')

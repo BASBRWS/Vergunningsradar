@@ -1,8 +1,8 @@
-import {TENDER_ROLES,currentRun,signature,uid} from './tender-core.js?v=20261102-rolprompts';
-import {validateTenderResult,tenderRequestBody,loadTenderContract} from './tender-ai.js?v=20261102-rolprompts';
-import {BLOCK_VERSION,validateEvidence} from './tender-block-contract.js?v=20261102-rolprompts';
-import {digest} from './tender-source-blocks.js?v=20261102-rolprompts';
-import {readBlock,writeBlock} from './tender-files.js?v=20261102-rolprompts';
+import {TENDER_ROLES,currentRun,signature,uid} from './tender-core.js?v=20261102-antwoordherstel';
+import {validateTenderResult,tenderRequestBody,loadTenderContract} from './tender-ai.js?v=20261102-antwoordherstel';
+import {BLOCK_VERSION,validateEvidence} from './tender-block-contract.js?v=20261102-antwoordherstel';
+import {digest} from './tender-source-blocks.js?v=20261102-antwoordherstel';
+import {readBlock,writeBlock} from './tender-files.js?v=20261102-antwoordherstel';
 
 export function processing(t){
  if(t.processing?.version!==BLOCK_VERSION)t.processing={version:BLOCK_VERSION,budget:60000,pages:2,batch:3,spent:0,actualInput:0,actualOutput:0,cached:0,requests:0,epoch:0,sourceDone:0,sourceTotal:0,last:''};
@@ -37,6 +37,13 @@ function synthesisTasks(t){
  for(const role of t.roles){const r=currentRun(t,role)?.result;if(!r)continue;const items=[...r.findings.filter(f=>!f.sources.length).map(f=>`${TENDER_ROLES[role]}, ${f.critical?'KRITIEK, ':''}${f.type}, ${f.title}. ${f.detail}`),...r.work_items.filter(w=>!w.sources.length).map(w=>`${TENDER_ROLES[role]}, werkpost, ${w.description}, ${w.quantity??'onbekend'} ${w.unit}, ${w.basis}.`)];
   for(const text of items)for(let start=0;start<text.length;start+=1800){const part=text.slice(start,start+1800);if(note.length+part.length>2200)flush();note+=part+'\n';}
  }flush();return tasks.length?tasks:[{evidence:[]}];
+}
+export function splitReviewData(data){
+ const parts=(key,items)=>{const middle=Math.ceil(items.length/2);return [items.slice(0,middle),items.slice(middle)].map((part,i)=>({...data,[key]:part,source_range:data.source_range+'/'+(i+1)}));};
+ if(data.evidence.length>1)return parts('evidence',data.evidence);
+ if(!data.evidence.length&&data.notes.length>1)return parts('notes',data.notes);
+ if(!data.evidence.length&&data.notes.length===1&&data.notes[0].text.length>1200){const value=data.notes[0].text;let mid=value.lastIndexOf('\n',Math.floor(value.length/2));if(mid<value.length/4)mid=Math.floor(value.length/2);if(/[\uD800-\uDBFF]/.test(value[mid-1]))mid--;return [value.slice(0,mid),value.slice(mid)].map((text,i)=>({...data,notes:[{...data.notes[0],text}],source_range:data.source_range+'/'+(i+1)}));}
+ return null;
 }
 export function estimateBlock(data,contract){
  const body=tenderRequestBody(data,'estimate-model',contract),content=body.input[0].content;
@@ -84,16 +91,37 @@ export async function runTenderBlocks(t,blocks,{analyze,onProgress=()=>{},onSave
   check();if(currentRun(t,role))continue;
   const tasks=role==='synthesis'?synthesisTasks(t):evidenceGroups(allPassages.filter(p=>p.roles.includes(role))).map(evidence=>({evidence})),groups=tasks.map(task=>task.evidence);
   let run=t.runs[role];if(!run||run.signature!==started||run.pipeline!==BLOCK_VERSION)run=t.runs[role]={id:uid(),signature:started,pipeline:BLOCK_VERSION,status:'running',result:null,completed:0,total:groups.length};
-  run.status='running';run.total=groups.length;const results=[];
+  run.status='running';run.splits ||= {};run.outputCaps ||= {};const results=[],plan=[];
+  const reviewKey=data=>digest(JSON.stringify({version:BLOCK_VERSION,started,epoch:state.epoch,data})).then(key=>'review:'+key);
+  async function addTask(data){
+   const key=await reviewKey(data),children=splitReviewData(data);
+   // Existing successful roots remain reusable, even if they contain twelve passages.
+   const large=data.evidence.length>6||data.evidence.length>1&&JSON.stringify(data.evidence).length>5500;
+   if(children&&(run.splits[key]||large&&!await cache.get(key))){run.splits[key]=true;for(const child of children)await addTask(child);}
+   else plan.push({key,data});
+  }
   for(let i=0;i<groups.length;i++){
    const data={stage:'review',role,documents:t.documents,meta:t.meta,prompt:t.prompts[role]||'',prior:[],evidence:groups[i],notes:roleNotes(t,role==='synthesis'?t.roles:t.roles.slice(0,t.roles.indexOf(role))),source_range:`deel ${i+1} van ${groups.length}`};
    if(tasks[i].extraNote)data.notes.push(tasks[i].extraNote);
    // Source summaries supply context when no discipline-specific passage was found.
    if(!groups[i].length&&!tasks[i].extraNote)data.notes=[...data.notes.slice(0,5),{role:'contract',text:('Geen specifieke passages voor deze rol in de bronindex. Controleer de scope en formuleer ontbrekende informatie als open vraag. Bronoverzicht, '+sources.map(s=>s.summary).join('\n')).slice(0,2400)}];
-   const key='review:'+await digest(JSON.stringify({version:BLOCK_VERSION,started,epoch:state.epoch,data}));
-   let result;try{result=await request(key,data,`${TENDER_ROLES[role]}, blok ${i+1} van ${groups.length}`);}catch(err){run.status='failed';await onSave();throw err;}
+   await addTask(data);
+  }
+  run.total=plan.length;await onSave();
+  for(let i=0;i<plan.length;i++){
+   const {key,data}=plan[i],requestData=run.outputCaps[key]?{...data,answer_tokens:run.outputCaps[key]}:data;
+   let result;try{result=await request(key,requestData,`${TENDER_ROLES[role]}, blok ${i+1} van ${plan.length}`);}catch(err){
+    run.status='failed';run.lastError={code:err.code||'AI_ERROR',stopReason:err.stopReason||'',block:i+1};
+    if(['AI_OUTPUT_LIMIT','AI_CONTEXT_LIMIT','AI_TIMEOUT'].includes(err.code)){
+     const children=splitReviewData(data);
+     if(children){run.splits[key]=true;run.total=plan.length+1;err.message+=' Dit blok wordt bij hervatten in twee kleinere delen beoordeeld. Er is niets automatisch opnieuw aangevraagd.';}
+     else if(err.code==='AI_OUTPUT_LIMIT'&&(run.outputCaps[key]||0)<12000){run.outputCaps[key]=12000;err.message+=' Bij hervatten krijgt alleen dit kleine blok maximaal 12.000 antwoordtokens. De dossierlimiet blijft gelden.';}
+     else err.message+=' Dit kleinste blok blijft gestopt. Controleer de aanvullende specialistprompt voordat je opnieuw probeert.';
+    }
+    state.last=err.message;await onSave();throw err;
+   }
    if(!result){run.status='paused';if(!state.last.startsWith('Tokenlimiet'))state.last='Gepauzeerd. Afgeronde blokken zijn opgeslagen. Hervat de beoordeling om verder te gaan.';await onSave();return {paused:true,calls};}
-   results.push(result);run.completed=results.length;run.result=mergeBlockResults(role,results,t.documents);await onSave();onProgress(`${TENDER_ROLES[role]}, ${run.completed} van ${groups.length} blokken opgeslagen`);
+   results.push(result);run.completed=results.length;run.result=mergeBlockResults(role,results,t.documents);await onSave();onProgress(`${TENDER_ROLES[role]}, ${run.completed} van ${plan.length} blokken opgeslagen`);
   }
   run.status='done';await onSave();
  }

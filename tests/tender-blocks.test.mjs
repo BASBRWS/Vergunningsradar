@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {newTender,currentRun,signature} from '../web/tender-core.js';
 import {runTenderBlocks,processing,estimateBlock,evidenceGroups,mergeBlockResults} from '../web/tender-block-runner.js';
-import {prepareSourceBlocks,textRanges} from '../web/tender-source-blocks.js';
+import {prepareSourceBlocks,textRanges,digest} from '../web/tender-source-blocks.js';
 import {tenderRequestBody} from '../web/tender-ai.js';
-import {EVIDENCE_SCHEMA,SOURCE_INSTRUCTIONS,validateEvidence} from '../web/tender-block-contract.js';
+import {BLOCK_VERSION,EVIDENCE_SCHEMA,SOURCE_INSTRUCTIONS,validateEvidence} from '../web/tender-block-contract.js';
+import {claudeReply,claudeRequestBody} from '../web/claude-api.js';
 import {createDirectAIClient} from '../web/calculator-direct-ai.js';
 const contract=JSON.parse(await readFile(new URL('../web/tender-contract.json',import.meta.url),'utf8'));
 const source={document_id:'doc1',location:'paragraaf 1',quote:'bestek'};
@@ -14,7 +15,7 @@ const evidence={summary:'Testverplichting.',complete:true,passages:[passage]};
 const doc={id:'doc1',name:'bestek.txt',size:6,version:'1',file_data:'data:text/plain;base64,YmVzdGVr'};
 const block={key:'source-key',documentId:'doc1',document:doc,units:0,range:'tekens 1 tot en met 6',label:'bestek.txt'};
 const result=role=>({role,summary:'Beoordeling.',findings:[{type:'requirement',title:'Test vereist',detail:'Testen opnemen.',critical:true,sources:[source]}],work_items:[],design:role==='synthesis'?'Ontwerp':'',plan:role==='synthesis'?'Planning':'',offer:role==='synthesis'?'Offertedeel':''});
-function setup(){const t=newTender();t.roles=['contract','electrical'];t.documents=[{...doc}];delete t.documents[0].file_data;const values=new Map(),cache={get:async key=>structuredClone(values.get(key)),set:async(key,value)=>values.set(key,structuredClone(value))};return {t,values,cache};}
+function setup(){const t=newTender();t.roles=['contract','electrical'];t.documents=[{...doc}];delete t.documents[0].file_data;processing(t).budget=500000;const values=new Map(),cache={get:async key=>structuredClone(values.get(key)),set:async(key,value)=>values.set(key,structuredClone(value))};return {t,values,cache};}
 test('three-request batch resumes from durable source and specialist blocks after JSON reload',async()=>{
  const {t,cache}=setup(),calls=[];const options={contract,cache,analyze:async(d,onUsage)=>{calls.push(d);onUsage({input:120,output:80,cached:10});return d.stage==='extract'?structuredClone(evidence):result(d.role);}};
  const first=await runTenderBlocks(t,[block],options);assert.equal(first.paused,true);assert.equal(calls.length,3);assert.ok(currentRun(t,'contract'));assert.ok(currentRun(t,'electrical'));assert.equal(t.processing.spent,600);assert.equal(t.processing.actualInput,360);assert.equal(t.processing.cached,30);
@@ -41,10 +42,10 @@ test('incomplete extraction, changed dossier and invented source ranges cannot b
  assert.throws(()=>validateEvidence({...evidence,passages:[{...passage,document_id:'invented'}]},[doc]));
 });
 test('partial role results and a checkpoint survive pausing halfway through a large role',async()=>{
- const {t,cache}=setup();t.roles=['contract'];const many={...evidence,passages:Array.from({length:24},(_,i)=>({...passage,detail:'Eis '+i+' '+('x'.repeat(880)),roles:['contract']}))};let paid=0;
- const options={contract,cache,maxRequests:3,analyze:async d=>{paid++;return d.stage==='extract'?many:result(d.role);}};
+ const {t,cache}=setup();t.roles=['contract'];const many={...evidence,passages:Array.from({length:24},(_,i)=>({...passage,detail:'Eis '+i+' '+('x'.repeat(880)),roles:['contract']}))};let paid=0;const calls=[];
+ const options={contract,cache,maxRequests:3,analyze:async d=>{paid++;calls.push(d.stage+':'+d.role+':'+d.source_range);return d.stage==='extract'?many:result(d.role);}};
  const first=await runTenderBlocks(t,[block],options);assert.equal(first.paused,true);assert.equal(t.runs.contract.completed,2);assert.ok(t.runs.contract.result);assert.equal(currentRun(t,'contract'),null);
- const cloned=JSON.parse(JSON.stringify(t));await runTenderBlocks(cloned,[block],{...options,maxRequests:0});assert.ok(currentRun(cloned,'contract'));assert.ok(currentRun(cloned,'synthesis'));assert.equal(paid,5);
+ const cloned=JSON.parse(JSON.stringify(t));await runTenderBlocks(cloned,[block],{...options,maxRequests:0});assert.ok(currentRun(cloned,'contract'));assert.ok(currentRun(cloned,'synthesis'));assert.equal(new Set(calls).size,paid);assert.ok(paid>5);
 });
 test('text chunks cover every character, bound length and do not cut UTF-16 surrogate pairs',()=>{
  const text=('hoofdstuk 😀 1\n'+('abc'.repeat(400))+'\n').repeat(40),ranges=textRanges(text);let end=0;
@@ -75,4 +76,37 @@ test('all critical findings without source survive bounded synthesis tasks even 
  const {t,cache}=setup();t.roles=['contract'];let offered='';
  await runTenderBlocks(t,[block],{contract,cache,maxRequests:0,analyze:async d=>{if(d.stage==='extract')return evidence;if(d.role==='contract'){const r=result('contract');r.findings=Array.from({length:20},(_,i)=>({type:'risk',title:'Onbevestigd punt '+i,detail:'Risico '+i+' '+('x'.repeat(200)),critical:true,sources:[]}));return r;}offered+=JSON.stringify(d.notes);return {...result('synthesis'),findings:[]};}});
  for(let i=0;i<20;i++)assert.ok(offered.includes('Onbevestigd punt '+i));assert.ok(currentRun(t,'synthesis'));
+});
+test('twenty-one previously read source blocks survive recovery without any source API calls or spending reset',async()=>{
+ const {t,cache}=setup();t.roles=['contract'];const state=processing(t);Object.assign(state,{spent:218846,actualInput:160000,actualOutput:31084,budget:499000,sourceDone:21});
+ const blocks=Array.from({length:21},(_,i)=>({...block,key:'old-'+i}));
+ for(const [i,b] of blocks.entries())await cache.set('source:'+b.key,{...evidence,passages:[{...passage,detail:'Eis '+i}]});
+ t.runs.contract={id:'old-failed',status:'failed',pipeline:BLOCK_VERSION,signature:signature(t),completed:0,total:11,result:null};
+ const calls=[];await runTenderBlocks(t,blocks,{contract,cache,maxRequests:1,analyze:async(d,onUsage)=>{calls.push(d);onUsage({input:100,output:50,cached:0});return result(d.role);}});
+ assert.equal(calls.length,1);assert.equal(calls[0].stage,'review');assert.ok(calls[0].evidence.length<=6);assert.equal(state.sourceDone,21);assert.equal(state.spent,218996);assert.equal(t.runs.contract.id,'old-failed');
+});
+test('output truncation saves a split, never silently retries and resumes only the smaller unfinished parts',async()=>{
+ const {t,cache}=setup();t.roles=['contract'];await cache.set('source:'+block.key,{...evidence,passages:Array.from({length:6},(_,i)=>({...passage,detail:'Eis '+i}))});let calls=0,fail=true;
+ const options={contract,cache,maxRequests:0,analyze:async d=>{calls++;if(fail)throw Object.assign(Error('Tokenlimit'),{code:'AI_OUTPUT_LIMIT',stopReason:'max_tokens'});assert.ok(d.evidence.length<=3);return result(d.role);}};
+ await assert.rejects(()=>runTenderBlocks(t,[block],options),/twee kleinere delen/);assert.equal(calls,1);assert.equal(t.runs.contract.lastError.code,'AI_OUTPUT_LIMIT');assert.equal(Object.keys(t.runs.contract.splits).length,1);
+ fail=false;const restored=JSON.parse(JSON.stringify(t));await runTenderBlocks(restored,[block],{...options,maxRequests:1});assert.equal(calls,2);assert.equal(restored.runs.contract.completed,1);assert.equal(currentRun(restored,'contract'),null);
+ await runTenderBlocks(restored,[block],options);assert.equal(calls,4);assert.ok(currentRun(restored,'synthesis'));
+});
+test('successful twelve-passage legacy review blocks retain their old cache keys and are never recharged',async()=>{
+ const {t,cache}=setup();t.roles=['contract'];const passages=Array.from({length:12},(_,i)=>({...passage,detail:'Eis '+i}));await cache.set('source:'+block.key,{...evidence,passages});
+ const data={stage:'review',role:'contract',documents:t.documents,meta:t.meta,prompt:'',prior:[],evidence:passages,notes:[],source_range:'deel 1 van 1'};
+ const key='review:'+await digest(JSON.stringify({version:BLOCK_VERSION,started:signature(t),epoch:processing(t).epoch,data}));await cache.set(key,result('contract'));
+ const calls=[];await runTenderBlocks(t,[block],{contract,cache,maxRequests:0,analyze:async d=>{calls.push(d.role);return result(d.role);}});assert.deepEqual(calls,['synthesis']);assert.ok(currentRun(t,'contract'));
+});
+test('one small truncated leaf gets a bounded higher cap only on manual resume, still subject to dossier budget',async()=>{
+ const {t,cache}=setup();t.roles=['contract'];await cache.set('source:'+block.key,evidence);let calls=0;
+ await assert.rejects(()=>runTenderBlocks(t,[block],{contract,cache,maxRequests:1,analyze:async()=>{calls++;throw Object.assign(Error('Truncated'),{code:'AI_OUTPUT_LIMIT'});}}),/12.000/);assert.equal(calls,1);
+ processing(t).budget=10000;const paused=await runTenderBlocks(t,[block],{contract,cache,maxRequests:1,analyze:async()=>{calls++;}});assert.equal(paused.paused,true);assert.equal(calls,1);
+ processing(t).budget=500000;await runTenderBlocks(t,[block],{contract,cache,maxRequests:1,analyze:async d=>{calls++;assert.equal(tenderRequestBody(d,'claude-opus-5-5',contract).max_output_tokens,12000);return result(d.role);}});assert.equal(calls,2);
+});
+test('Opus request caps include reasoning, pin effort and cache repeated specialist instructions only',()=>{
+ const d={stage:'review',role:'contract',documents:[doc],meta:newTender().meta,prompt:'',prior:[],source_range:'deel 1',evidence:[passage],notes:[]};
+ const body=claudeRequestBody(tenderRequestBody(d,'claude-opus-5-5',contract));assert.equal(body.max_tokens,6000);assert.equal(body.output_config.effort,'medium');assert.deepEqual(body.system[0].cache_control,{type:'ephemeral'});
+ const sourceBody=claudeRequestBody(tenderRequestBody({...d,stage:'extract'},'claude-opus-5-5',contract));assert.equal(sourceBody.output_config.effort,'low');assert.equal(typeof sourceBody.system,'string');
+ assert.throws(()=>claudeReply({type:'message',stop_reason:'max_tokens',content:[{type:'text',text:JSON.stringify(result('contract'))}]}),err=>err.code==='AI_OUTPUT_LIMIT');
 });
