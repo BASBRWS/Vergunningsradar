@@ -10,7 +10,7 @@ De productie-API staat in `backend/`. Deze werkt met SQLite, Python 3.13, SMTP e
 
 ## Offertewerkplaats voor installatiebedrijven
 
-Open `calculator.html` via de link Offertewerkplaats op de website of in de werkruimte. De extra pagina bevat een gerichte klantintake, opdrachtdossier met bevestigingen, kostencatalogus, calculatie van uren en inkoop, overhead, risico, marge of opslag, korting en btw. Conceptontwerp, projectplan, offerteafdruk en projectexport werken lokaal. De volledigheidsscore van 95 procent is geen technische zekerheid. Een vrije AI dialoog vereist de optionele serverkoppeling met eigen API sleutel en modeltoegang. Deze is voorbereid, maar nog niet live aangesloten.
+Open `calculator.html` via de link Offertewerkplaats op de website of in de werkruimte. De extra pagina bevat een gerichte klantintake, opdrachtdossier met bevestigingen, kostencatalogus, calculatie van uren en inkoop, overhead, risico, marge of opslag, korting en btw. Conceptontwerp, projectplan, offerteafdruk en projectexport werken lokaal. De volledigheidsscore van 95 procent is geen technische zekerheid. Voor een persoonlijke AI test kun je bij Configuratie jouw eigen OpenAI API sleutel en model invullen en rechtstreeks vanaf GitHub Pages testen. De sleutel blijft alleen in het tabbladgeheugen en wordt gewist bij verversen. Voor gedeeld klantgebruik is de serverstand met serverzijdige sleutel bedoeld. Er staat geen werkende sleutel in deze repository.
 
 Zie [docs/OFFERTEWERKPLAATS.md](docs/OFFERTEWERKPLAATS.md) voor gebruik, rekenregels en de grenzen van deze demo.
 

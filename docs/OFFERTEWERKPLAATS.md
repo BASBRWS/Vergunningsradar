@@ -45,7 +45,21 @@ De werkende standaardmodus is een gerichte intake met vaste vragen. Hij legt een
 
 ## AI aansluiten
 
-Een vrije AI dialoog gebruikt de bestaande Python server. Er wordt geen sleutel in de openbare frontend opgeslagen.
+Er zijn twee verbindingswijzen. Bij een nog niet aangesloten server opent de configuratie standaard in Persoonlijke test, rechtstreeks naar OpenAI. Bij een ingesteld serveradres blijft de serverstand standaard actief.
+
+### Persoonlijke test vanaf GitHub Pages
+
+Open Configuratie en kies Persoonlijke test, rechtstreeks naar OpenAI. Vul jouw eigen OpenAI API sleutel en de modelnaam uit jouw OpenAI project in. Het model moet Responses en Structured Outputs ondersteunen. Er wordt geen modelnaam verondersteld, omdat toegang per API project kan verschillen. Klik AI verbinding testen. Deze test doet een echte modelaanroep met een controlebericht zonder klantgegevens. Na een geslaagde test kun je toestemming geven voor het AI gesprek.
+
+Deze stand vereist geen extra hosting, serveradres of Vergunningradar account. De browser stuurt de sleutel alleen als Authorization header naar het vaste adres `https://api.openai.com/v1/responses`. De sleutel komt niet in de URL, aanvraagbody, HTML broncode, GitHub repository, localStorage, sessionStorage, printdocumenten of projectexport. Hij leeft alleen in het geheugen van de JavaScript module en tijdelijk in het wachtwoordveld tijdens invoer. Bij verversen, verlaten van de pagina, wisselen van verbindingswijze, AI uitschakelen of Sleutel wissen worden de sleutel en het invoerveld gewist. Modelnaam en verbindingstoestemming zijn in deze stand ook niet persistent.
+
+Een sleutel in een browser blijft bereikbaar voor scripts en ontwikkelaarstools in dat tabblad. Gebruik deze stand uitsluitend voor jouw eigen ontwikkeltest, met een aparte testsleutel en passende API limieten. Hij is niet bedoeld om een bedrijfssleutel te delen met klanten of medewerkers. Zowel testen als chatten gebruiken jouw API account. Er wordt geen gratis API gebruik of werking met elk model beloofd. Bron voor tijdelijk browsergebruik, [official OpenAI documentation](https://developers.openai.com/api/reference/typescript).
+
+Directe modelantwoorden worden eerst volledig gevalideerd. Het model kan alleen dossierwijzigingen en voorbereiding voorstellen, geen prijzen, klantbevestigingen, verificaties of vrijgave. De app voegt calculatieregels niet automatisch toe. Updates worden pas toegepast nadat het complete antwoord is verwerkt. De verbindingscontrole en foutafhandeling zijn getest met gesimuleerde providerantwoorden. Er is geen echte API sleutel gebruikt voor het testen van deze release.
+
+### Via eigen server
+
+Voor gedeeld gebruik bewaart de bestaande Python server de API sleutel buiten de browser. Er wordt geen sleutel in de openbare frontend opgeslagen.
 
 1. Configureer `OPENAI_API_KEY` en `OPENAI_MODEL` als omgevingsvariabelen op de server. Kies een model met Responses en Structured Outputs waarvoor het eigen API account toegang heeft.
 2. Gebruik de bestaande serverconfiguratie, HTTPS, CORS en accounts uit INSTALLATIE.md. Stel `web/config.js` in op de API URL. Een lege API URL laat de bestaande site en de offertewerkplaats in de lokale demo draaien.
