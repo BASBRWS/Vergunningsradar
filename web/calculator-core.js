@@ -1,9 +1,9 @@
-import {MAX_CATALOG_ITEMS} from './installation-catalog.js?v=20261102-catalog-v2';
+import {MAX_CATALOG_ITEMS} from './installation-catalog.js?v=20261102-claude';
 import {catalogMetadata} from './professional-catalog.js';
 import {tenderChecklist,importTender} from './tender-core.js';
 import {validateTenderResult} from './tender-ai.js';
 import {GUIDES,PREPARATION_KINDS,isUncertainAnswer,preparationFor,preparationText} from './intake-guide.js';
-import {INSTALLATION_PRODUCTS} from './installation-catalog.js?v=20261102-catalog-v2';
+import {INSTALLATION_PRODUCTS} from './installation-catalog.js?v=20261102-claude';
 // All amounts in the calculation result are integer euro cents.
 export const FIELDS = [
   ['trade','Installatiegebied',8,true,'Wat wil je laten installeren of aanpassen, bijvoorbeeld elektra, verwarming, water of ventilatie?'],

@@ -1,8 +1,7 @@
 """Optional structured intake, isolated from prices, confirmations and quote release."""
 import json
 import os
-import urllib.error
-import urllib.request
+from . import ai_provider
 
 FIELDS = ('trade','customer','address','building','goal','scope','existing','access','constraints','timing','budget','exclusions','acceptance','decision','docs')
 INSTRUCTIONS = '''Je bent de Nederlandse intake-assistent van een installatiebedrijf.
@@ -42,7 +41,7 @@ exclusions afbakening/derden, acceptance tests/oplevering, decision besluit/beta
 Antwoord kort en begrijpelijk in het Nederlands. Gebruik updates als voorstellen, geen bevestigde feiten.'''
 
 def configured():
-    return bool(os.environ.get('OPENAI_API_KEY') and os.environ.get('OPENAI_MODEL'))
+    return ai_provider.configured()
 
 def validate_input(data):
     message = data.get('message')
@@ -112,7 +111,7 @@ def probe():
 def chat(data):
     payload = validate_input(data)
     if not configured():
-        raise ValueError('De AI is niet aangesloten. De server mist OPENAI_API_KEY of OPENAI_MODEL.')
+        raise ValueError('De AI is niet aangesloten. Stel de API sleutel en het model voor de gekozen aanbieder in op de server.')
     schema = {'type':'object','properties':{
         'reply':{'type':'string'},
         'next_field':{'type':'string','enum':['',*FIELDS]},
@@ -125,26 +124,7 @@ def chat(data):
             'field':{'type':'string','enum':list(FIELDS)},'value':{'type':'string'}
         },'required':['field','value'],'additionalProperties':False}}
     },'required':['reply','updates','preparation','next_field'],'additionalProperties':False}
-    body = {'model':os.environ['OPENAI_MODEL'],'store':False,'max_output_tokens':3500,
+    body = {'model':ai_provider.model(),'store':False,'max_output_tokens':3500,
             'instructions':INSTRUCTIONS,'input':json.dumps(payload,ensure_ascii=False),
             'text':{'format':{'type':'json_schema','name':'installation_intake','strict':True,'schema':schema}}}
-    req = urllib.request.Request('https://api.openai.com/v1/responses',data=json.dumps(body).encode(),
-        headers={'Authorization':'Bearer '+os.environ['OPENAI_API_KEY'],'Content-Type':'application/json'},method='POST')
-    try:
-        with urllib.request.urlopen(req,timeout=55) as response:
-            raw = response.read(250001)
-        if len(raw)>250000:
-            raise ValueError('Het AI antwoord is te groot.')
-        result = json.loads(raw)
-    except (urllib.error.URLError,TimeoutError,OSError) as exc:
-        # Never expose provider bodies, keys, account identifiers or submitted customer content.
-        raise ValueError('De AI dienst antwoordt niet. Controleer serverconfiguratie, modeltoegang en tegoed.') from exc
-    if result.get('status')!='completed':
-        raise ValueError('Het AI antwoord is niet afgerond. Probeer een korter bericht.')
-    output = [part.get('text','') for item in result.get('output',[]) if item.get('type')=='message'
-              for part in item.get('content',[]) if part.get('type')=='output_text']
-    try:
-        parsed = json.loads(''.join(output))
-    except (ValueError,TypeError) as exc:
-        raise ValueError('De AI gaf geen bruikbaar antwoord. Er is niets in het dossier aangepast.') from exc
-    return validate_output(parsed)
+    return validate_output(ai_provider.complete(body,timeout=55,limit=250000))

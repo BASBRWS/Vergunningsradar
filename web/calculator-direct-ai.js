@@ -1,3 +1,4 @@
+import {CLAUDE_ENDPOINT,CLAUDE_VERSION,claudeRequestBody,claudeReply,claudeError} from './claude-api.js';
 import {loadTenderContract,tenderRequestBody,validateTenderResult} from './tender-ai.js';
 import {GUIDES,PREPARATION_KINDS} from './intake-guide.js';
 
@@ -54,27 +55,31 @@ function providerError(status,code){
 
 // The credential lives only inside this closure. No storage, exports, logs or configurable host.
 export function createDirectAIClient(fetcher=(...args)=>fetch(...args)){
- let key='',model='',tested=false,controller=null,generation=0;
- const status=()=>({hasKey:Boolean(key),model,tested});
+ let key='',model='',provider='openai',tested=false,controller=null,generation=0;
+ const status=()=>({hasKey:Boolean(key),model,tested,provider});
  function clear(){generation++;controller?.abort();controller=null;key='';tested=false;}
- function configure(nextKey,nextModel){
-  const candidate=typeof nextKey==='string'&&nextKey.trim()?nextKey.trim():key;
-  if(candidate.length<20||candidate.length>1000||/\s/.test(candidate))throw Error('Vul jouw eigen OpenAI API sleutel in.');
-  if(typeof nextModel!=='string'||!/^[-a-zA-Z0-9_.:]{1,100}$/.test(nextModel.trim()))throw Error('Vul de modelnaam uit jouw OpenAI project in.');
-  generation++;controller?.abort();controller=null;key=candidate;model=nextModel.trim();tested=false;
+ function configure(nextKey,nextModel,nextProvider='openai'){
+  if(!['openai','anthropic'].includes(nextProvider))throw Error('Kies OpenAI of Claude als AI aanbieder.');
+  const candidate=typeof nextKey==='string'&&nextKey.trim()?nextKey.trim():nextProvider===provider?key:'';
+  if(candidate.length<20||candidate.length>1000||/\s/.test(candidate))throw Error('Vul jouw eigen '+(nextProvider==='anthropic'?'Anthropic':'OpenAI')+' API sleutel in.');
+  if(typeof nextModel!=='string'||!/^[-a-zA-Z0-9_.:]{1,100}$/.test(nextModel.trim()))throw Error('Vul de modelnaam uit jouw API project in.');
+  generation++;controller?.abort();controller=null;key=candidate;model=nextModel.trim();provider=nextProvider;tested=false;
  }
  async function execute(body,validate){
   if(!key)throw Error('Vul eerst jouw eigen API sleutel in bij Configuratie.');
   if(controller)throw Error('Er wordt al een AI aanvraag verwerkt.');
+  const selected=provider,claude=selected==='anthropic',requestBody=claude?claudeRequestBody(body):body;
   const started=generation;controller=new AbortController();const signal=AbortSignal.any([controller.signal,AbortSignal.timeout(90000)]);
   try{
    let response;
-   try{response=await fetcher(ENDPOINT,{method:'POST',mode:'cors',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer',cache:'no-store',signal,headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:JSON.stringify(body)});}
-   catch(err){if(err?.name==='AbortError'||err?.name==='TimeoutError')throw Error('De AI aanvraag is gestopt of duurde te lang. Probeer opnieuw.');throw Error('De browser bereikt OpenAI niet. Controleer jouw internetverbinding en browser- of netwerkblokkades.');}
+   try{response=await fetcher(claude?CLAUDE_ENDPOINT:ENDPOINT,{method:'POST',mode:'cors',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer',cache:'no-store',signal,headers:claude?{'Content-Type':'application/json','x-api-key':key,'anthropic-version':CLAUDE_VERSION,'anthropic-dangerous-direct-browser-access':'true'}:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:JSON.stringify(requestBody)});}
+   catch(err){if(err?.name==='AbortError'||err?.name==='TimeoutError')throw Error('De AI aanvraag is gestopt of duurde te lang. Probeer opnieuw.');throw Error('De browser bereikt '+(claude?'Claude':'OpenAI')+' niet. Controleer jouw internetverbinding en browser- of netwerkblokkades.');}
    const raw=await response.text();if(raw.length>600000)throw Error('Het AI antwoord is te groot. Probeer een korter bericht.');
-   let value;try{value=JSON.parse(raw);}catch{throw Error('OpenAI gaf geen geldig API antwoord. Probeer later opnieuw.');}
-   if(!response.ok)throw Error(providerError(response.status,value?.error?.code));
-   if(!object(value)||!Array.isArray(value.output))throw Error('OpenAI gaf geen geldig API antwoord. Probeer later opnieuw.');
+   let value;try{value=JSON.parse(raw);}catch{throw Error((claude?'Claude':'OpenAI')+' gaf geen geldig API antwoord. Probeer later opnieuw.');}
+   if(!response.ok)throw Error(claude?claudeError(response.status):providerError(response.status,value?.error?.code));
+   if(started!==generation||!key)throw Error('De sleutel is gewist. Verbind opnieuw om verder te gaan.');
+   if(claude)return validate(claudeReply(value));
+   if(!object(value)||!Array.isArray(value.output))throw Error((claude?'Claude':'OpenAI')+' gaf geen geldig API antwoord. Probeer later opnieuw.');
    if(started!==generation||!key)throw Error('De sleutel is gewist. Verbind opnieuw om verder te gaan.');
    if(value.status!=='completed')throw Error('Het modelantwoord is niet afgerond. Probeer een korter bericht of controleer het gekozen model.');
    let output='';for(const item of value.output)if(object(item)&&item.type==='message'&&Array.isArray(item.content))for(const part of item.content){if(!object(part))continue;if(part.type==='refusal')throw Error('Het model heeft geen intakeantwoord gegeven. Formuleer jouw vraag anders.');if(part.type==='output_text')output+=part.text||'';}

@@ -5,7 +5,7 @@ from http.server import ThreadingHTTPServer,BaseHTTPRequestHandler
 from .domain import *
 from .store import *
 from .jobs import list_leads,address_key,opted_out,resolve_pending
-from . import sources,billing,quotation_chat,tender
+from . import sources,billing,quotation_chat,tender,ai_provider
 log=logging.getLogger('radar')
 class HTTPError(Exception):
     def __init__(self,status,message):self.status=status;self.message=message
@@ -106,7 +106,7 @@ def dispatch(method,path,d,auth='',ip='local'):
             billing.webhook(str(d.get('id','')));return {'ok':True}
         u=get_user(c,auth);account=u['account_id']
         if path=='/calculator/capabilities' and method=='GET':
-            return {'configured':quotation_chat.configured(),'mode':'structured-intake','calculations':'browser-fixed-rules'}
+            return {'configured':quotation_chat.configured(),'provider':ai_provider.provider(),'model':ai_provider.model(),'mode':'structured-intake','calculations':'browser-fixed-rules'}
         if path in ('/calculator/chat','/calculator/test','/calculator/tender') and method=='POST':
             require_write(u)
             limited(c,'calculator-user:'+u['id'],30)

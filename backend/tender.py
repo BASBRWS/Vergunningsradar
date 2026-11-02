@@ -5,8 +5,7 @@ import json
 import math
 import os
 from pathlib import Path
-import urllib.error
-import urllib.request
+from . import ai_provider
 
 CONTRACT_PATH = Path(__file__).with_name('tender-contract.json')
 if not CONTRACT_PATH.exists():
@@ -90,18 +89,6 @@ def request_body(data, model):
         'text':{'format':{'type':'json_schema','name':'tender_specialist','strict':True,'schema':CONTRACT['schema']}}}
 
 def analyze(data):
-    if not os.environ.get('OPENAI_API_KEY') or not os.environ.get('OPENAI_MODEL'):raise ValueError('Stel OPENAI_API_KEY en OPENAI_MODEL in op de server.')
-    body=request_body(data,os.environ['OPENAI_MODEL'])
-    request=urllib.request.Request('https://api.openai.com/v1/responses',data=json.dumps(body).encode(),headers={'Authorization':'Bearer '+os.environ['OPENAI_API_KEY'],'Content-Type':'application/json'},method='POST')
-    try:
-        with urllib.request.urlopen(request,timeout=90) as response:raw=response.read(600001)
-        if len(raw)>600000:raise ValueError('Het specialistantwoord is te groot.')
-        envelope=json.loads(raw)
-    except (urllib.error.URLError,TimeoutError,OSError) as exc:
-        raise ValueError('De AI dienst antwoordt niet. Controleer modeltoegang, PDF ondersteuning en API tegoed.') from exc
-    if not isinstance(envelope,dict) or envelope.get('status')!='completed':raise ValueError('De specialistanalyse is niet afgerond. Verdeel het dossier in kleinere werkpakketten.')
-    try:
-        output=''.join(part.get('text','') for item in envelope.get('output',[]) if item.get('type')=='message' for part in item.get('content',[]) if part.get('type')=='output_text')
-        result=json.loads(output)
-    except (ValueError,TypeError,AttributeError) as exc:raise ValueError('De specialist gaf geen bruikbaar analyseantwoord.') from exc
-    return validate_result(result,data['documents'],data['role'])
+    if not ai_provider.configured():raise ValueError('Stel de API sleutel en het model voor de gekozen AI aanbieder in op de server.')
+    body=request_body(data,ai_provider.model())
+    return validate_result(ai_provider.complete(body,timeout=90),data['documents'],data['role'])

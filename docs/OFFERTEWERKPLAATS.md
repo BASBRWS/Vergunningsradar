@@ -162,3 +162,20 @@ Zoeken combineert woorden in artikelcode, fabrikantnummer, merk, EAN, serie, oms
 De catalogusgrens is 20.000 regels. De CSV importgrens is 10 MB. De offerte houdt maximaal 500 calculatieregels. De volledige standaardcatalogus kan worden gedownload via `installatiecatalogus.csv`. De oude download `installatiematerialen-300.csv` blijft beschikbaar. Catalogus CSV exporteert de eigen actuele catalogus, inclusief fabrikantgegevens en prijsstatus. Een CSV import vervangt de huidige catalogus. Bestaande projecten en calculatieregels behouden hun eigen prijzen.
 
 Bij de automatische uitbreiding blijven bestaande eigen prijzen, artikelen en projecten bewaard. Browseropslag bevat alleen verschillen ten opzichte van de standaardcatalogus. Dit voorkomt dat de volledige fabrikantselectie de opslagruimte voor projectdossiers inneemt. Bij herladen worden standaardartikelen, eigen wijzigingen en verwijderingen samengevoegd. Het bronregister met downloadlinks, SHA-256, controledatum en aantallen staat in `catalog-sources.json`.
+
+
+## Claude API, 2 november 2026
+
+Configuratie bevat nu een expliciete keuze voor Claude, Anthropic API, of OpenAI API in de persoonlijke teststand. Een nieuw tabblad start met Claude geselecteerd. Vul jouw Anthropic sleutel en exacte model-ID in en kies AI verbinding testen. De test vraagt een echt gestructureerd antwoord zonder klantgegevens. Geen fictieve verbindingsstatus. Kies een model met Structured Outputs. De test controleert tekstuitvoer, niet de volledige PDF verwerking.
+
+De sleutel staat alleen in het tabbladgeheugen, nooit in localStorage, IndexedDB, GitHub, auditlogs of projectexports. De invoer wordt geleegd bij testen. Wisselen van aanbieder wist sleutel, model-ID, toestemming en verbindingstest. Er is geen automatische doorschakeling tussen aanbieders. Sleutels gaan uitsluitend naar het vaste endpoint van de gekozen stand. De applicatie kan niet controleren wie een handmatig ingeplakte sleutel heeft uitgegeven, kies de juiste aanbieder.
+
+Claude gebruikt rechtstreeks https://api.anthropic.com/v1/messages met x-api-key, anthropic-version 2026-10-21 en in de persoonlijke browserstand de expliciete officiële browserheader. Dezelfde intakeprompt en het strikte schema worden via system, messages en output_config.format meegestuurd. Alleen afgeronde Claude antwoorden met stop_reason end_turn worden gelezen. Onvolledige uitvoer, weigeringen, onbekende bronidentiteiten, extra prijs- of bevestigingsvelden worden afgewezen. Foutteksten herhalen nooit ruwe providerfouten of sleutels.
+
+Bestekken kunnen als PDF, TXT of MD naar Claude. Tekstbestanden moeten UTF-8 zijn. DOCX is in deze koppeling niet rechtstreeks ondersteund. Zet DOCX om naar PDF en voeg de PDF toe. De server en browser blokkeren DOCX vóór de documentaanvraag. PDF bestanden worden als base64 documentblokken doorgegeven, tekstbestanden als tekstbron. Bronverwijzingen blijven AI voorstellen die jij controleert. Geen native Claude citations worden ingeschakeld, die zijn niet combineerbaar met dit JSON schema.
+
+Bestaande beoordeelde dossierstukken worden niet automatisch opnieuw geanalyseerd na een aanbiederwissel. Kies Opnieuw analyseren als je alle specialisten opnieuw door Claude wilt laten uitvoeren. Openstaande aanvragen kunnen pas na afloop worden omgeschakeld via de vergrendelde configuratie. De huidige analysegrenzen, de beoordeling door specialisten en handmatige offertevrijgave blijven gelden.
+
+Servergebruik vereist AI_PROVIDER=anthropic, ANTHROPIC_API_KEY en ANTHROPIC_MODEL op de server. Het serverantwoord capabilities toont alleen aanbieder, model-ID en configuratiestatus. Een browser kan de serveraanbieder niet met een requestveld veranderen. AI_PROVIDER=openai gebruikt OPENAI_API_KEY en OPENAI_MODEL. De bestaande accountcontrole en gedeelde limieten gelden voor beide aanbieders.
+
+De verbindingstest en AI aanvragen gebruiken jouw API tegoed. De tests voor deze implementatie gebruiken nagebootste modelantwoorden, geen echte klantstukken of werkende sleutels. De netwerktoegang voor GitHub Pages is afzonderlijk gecontroleerd met een OPTIONS aanvraag zonder sleutel.
