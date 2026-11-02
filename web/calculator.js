@@ -1,12 +1,12 @@
 import {CATALOG_SOURCES,PRICE_TYPES,articlePriceLabel} from './professional-catalog.js';
 import {serializeVault,decodeCatalog} from './catalog-storage.js';
-import {createTenderWorkspace} from './tender-workspace.js';
+import {createTenderWorkspace} from './tender-workspace.js?v=20261102-catalog-v2';
 import {ensureTender} from './tender-core.js';
-import {createDirectAIClient} from './calculator-direct-ai.js?v=20261102-catalog';
+import {createDirectAIClient} from './calculator-direct-ai.js?v=20261102-catalog-v2';
 import {GUIDES,PREPARATION_KINDS,isUncertainAnswer,preparationFor,preparationText} from './intake-guide.js';
 import {connectionState,friendlyConnectionError} from './calculator-connection.js';
-import {INSTALLATION_PRODUCTS,INSTALLATION_CATALOG_VERSION,mergeInstallationCatalog,filterCatalog,MAX_CATALOG_ITEMS} from './installation-catalog.js';
-import {FIELDS,CATEGORIES,DEFAULT_SETTINGS,CATALOG,money,cents,id,newProject,known,completeness,phase,nextField,invalidate,setField,confirmFields,calculate,releaseIssues,localReply,generateDocuments,parseCSV,validateProject,nextIntakeField,deferQuestion,upsertPreparation,resolvePreparation} from './calculator-core.js?v=20261102-catalog';
+import {INSTALLATION_PRODUCTS,INSTALLATION_CATALOG_VERSION,mergeInstallationCatalog,filterCatalog,MAX_CATALOG_ITEMS} from './installation-catalog.js?v=20261102-catalog-v2';
+import {FIELDS,CATEGORIES,DEFAULT_SETTINGS,CATALOG,money,cents,id,newProject,known,completeness,phase,nextField,invalidate,setField,confirmFields,calculate,releaseIssues,localReply,generateDocuments,parseCSV,validateProject,nextIntakeField,deferQuestion,upsertPreparation,resolvePreparation} from './calculator-core.js?v=20261102-catalog-v2';
 const $=s=>document.querySelector(s), e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const KEY='vr-offertewerkplaats-v1';let tab='gesprek',busy=false,noticeTimer,ai=false,aiStatus='Nog niet verbonden',consent=false,providerTested=false,catalogSearch='',catalogGroup='',catalogBrand='',catalogDiscipline='',catalogPrice='',catalogPage=0;
 const CATALOG_PAGE_SIZE=50;
