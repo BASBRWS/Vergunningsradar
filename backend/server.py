@@ -5,7 +5,7 @@ from http.server import ThreadingHTTPServer,BaseHTTPRequestHandler
 from .domain import *
 from .store import *
 from .jobs import list_leads,address_key,opted_out,resolve_pending
-from . import sources,billing,quotation_chat
+from . import sources,billing,quotation_chat,tender
 log=logging.getLogger('radar')
 class HTTPError(Exception):
     def __init__(self,status,message):self.status=status;self.message=message
@@ -107,13 +107,13 @@ def dispatch(method,path,d,auth='',ip='local'):
         u=get_user(c,auth);account=u['account_id']
         if path=='/calculator/capabilities' and method=='GET':
             return {'configured':quotation_chat.configured(),'mode':'structured-intake','calculations':'browser-fixed-rules'}
-        if path in ('/calculator/chat','/calculator/test') and method=='POST':
+        if path in ('/calculator/chat','/calculator/test','/calculator/tender') and method=='POST':
             require_write(u)
             limited(c,'calculator-user:'+u['id'],30)
             limited(c,'calculator-account:'+account,100)
-            audit(c,u['id'],'calculator-test' if path.endswith('/test') else 'calculator-chat',account)
+            audit(c,u['id'],'calculator-test' if path.endswith('/test') else 'calculator-tender' if path.endswith('/tender') else 'calculator-chat',account)
             c.commit() # Persist quota before slow external I/O, including provider failures.
-            return quotation_chat.probe() if path.endswith('/test') else quotation_chat.chat(d)
+            return quotation_chat.probe() if path.endswith('/test') else tender.analyze(d) if path.endswith('/tender') else quotation_chat.chat(d)
         if path=='/me' and method=='GET':return {k:u[k] for k in ['id','account_id','company','email','role','readOnly']}
         if path=='/auth/logout' and method=='POST':c.execute('DELETE FROM sessions WHERE hash=?',(hashed(auth[7:]),));return {'ok':True}
         if path=='/leads' and method=='GET':return list_leads(c,account)
@@ -195,7 +195,10 @@ class Handler(BaseHTTPRequestHandler):
             if self.command=='OPTIONS':self.send_json(200,{});return
             path=urllib.parse.urlsplit(self.path).path
             n=int(self.headers.get('Content-Length','0'))
-            if n<0 or n>65536:raise HTTPError(413,'Aanvraag te groot.')
+            large=path=='/calculator/tender' and self.command=='POST'
+            if large:
+                with db() as c:require_write(get_user(c,self.headers.get('Authorization','')))
+            if n<0 or n>(18*1024*1024 if large else 65536):raise HTTPError(413,'Aanvraag te groot.')
             raw=self.rfile.read(n);data={}
             if raw:
                 if path=='/webhooks/mollie':data={k:v[0] for k,v in urllib.parse.parse_qs(raw.decode()).items()}

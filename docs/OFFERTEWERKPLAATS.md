@@ -106,3 +106,40 @@ Het tabblad Voorbereiding bewaart per punt het opdrachtveld, de actie, de verant
 Aannames zijn expliciete voorstellen zonder verzonnen vermogens, aantallen of veiligheidsconclusies. De klant kan een voorlopig uitgangspunt accepteren. Dat is geen verificatie en levert geen bevestigingspunten op. Een open voorbereidingspunt blijft de definitieve offerte blokkeren. Na navraag of opname legt de installateur de concrete uitkomst vast via Uitkomst vastleggen en verifiëren. Het bijbehorende opdrachtveld wordt aangepast en vereist daarna opnieuw klantbevestiging. Een projectimport trekt ook de verificatie en acceptatie van voorbereidingspunten in.
 
 De AI instructies volgen dezelfde werkwijze. De AI kan eenvoudige vervolgvragen, aannames en opnamepunten voorstellen. Alleen de gebruiker kan een uitkomst verifiëren. De API accepteert geen modelvelden die bevestiging, verificatie of vrijgave claimen.
+
+
+## Bestek, contract en TenderNed
+
+Kies Nieuwe opdracht, TenderNed, bestek of contract. Dit opent een eigen dossier in plaats van de vijftien klantintakevragen. Vul opdrachtgever, projectgegevens en de indieningsafspraken in. Een HTTPS TenderNed link is uitsluitend een referentie, geen automatische import of tenderzoekmachine. Download de oorspronkelijke stukken zelf, inclusief nota’s van inlichtingen en relevante bijlagen.
+
+Bronbestanden worden met IndexedDB uitsluitend in de eigen browser bewaard. Ondersteund zijn PDF, DOCX, TXT en MD, maximaal 10 bestanden, 6 MB per bestand en 12 MB samen. Grote dossiers moeten per werkpakket worden verdeeld. Bestanden staan niet in GitHub en niet in de JSON projectexport. Bewaar originelen zelf. Bij een import op een andere computer moet je de stukken opnieuw toevoegen en analyseren. Een verwijderde vermelding wordt uit het dossier gehaald. De browser kan nog een kopie bewaren zolang andere lokale projectkopieën dezelfde bestandsidentiteit gebruiken.
+
+Het gebruikte OpenAI model moet de Responses API, Structured Outputs en de aangeleverde bestandstypen ondersteunen. Voor PDF is beeldondersteuning nodig. PDF invoer omvat tekst en paginabeelden. DOCX wordt als tekst verwerkt, ingebedde afbeeldingen worden niet automatisch gelezen. Lever tekeningen als PDF aan. Een geslaagde tekstverbindingstest bewijst nog geen PDF ondersteuning voor dat model.
+
+### Specialistbeoordelingen
+
+De standaardvolgorde is contractmanager, elektrotechniek, werktuigbouw, werkvoorbereiding en uitvoering, calculator en daarna offertemanager. Contractmanager en offertemanager zijn verplicht. De overige rollen kun je selecteren. Elke rol krijgt de originele stukken, eigen instructies, jouw aanvullende specialistprompt en de geslaagde eerdere analyses. Dezelfde rollen zijn AI promptrollen binnen één dienst, geen onafhankelijk gevalideerde deskundigen. De centrale bron- en onzekerheidsregels blijven altijd van toepassing. De promptdefinities en het strikte uitvoercontract staan in `web/tender-contract.json`, gedeeld door browser en server.
+
+Standaard worden zes afzonderlijke API aanvragen uitgevoerd, elk met de bronstukken. Elke aanvraag gebruikt jouw API tegoed. Analyse starten of hervatten slaat nog actuele beoordelingen over. Stop na huidige specialist wacht de lopende aanvraag af. Een fout stopt de reeks zonder automatisch te herhalen of resultaten te verzinnen. Opnieuw analyseren vervangt eerdere analyses en beoordelingen. Bestaande calculatieregels blijven staan, controleer wijzigingen en dubbeltellingen. Wijziging van metadata, bestand, rolkeuze of prompt maakt analyses verouderd.
+
+De output bevat bevindingen, documentverwijzingen, werkpostvoorstellen en een samenvatting per rol. Alleen de offertemanager schrijft een gezamenlijk functioneel conceptontwerp, projectplan en aanbieding. Bronverwijzingen zijn AI voorstellen. De app controleert dat een genoemde documentidentiteit bestaat, niet dat de geciteerde passage of interpretatie klopt. Controleer het origineel, kies een verwerking en leg een onderbouwd besluit vast. Alle actuele bevindingen moeten beoordeeld zijn voordat vrijgave kan volgen. Een uitgezette vraag is nog niet afgehandeld. De vragenlijst voor de nota van inlichtingen kan als tekst worden gedownload; er wordt niets automatisch verstuurd of ingediend.
+
+Een analyse levert maximaal 20 bevindingen en 15 werkpostvoorstellen per rol. Deze grenzen voorkomen onbegrensde uitvoer, maar zijn geen garantie dat een volledig omvangrijk bestek wordt afgedekt. Laat uitgebreide bestekken per onderdeel beoordelen en controleer zelf de dekking. Bij contextlimieten of een onafgerond antwoord is opsplitsen nodig. Er is geen automatische volledige juridische toets, normcontrole, installatieberekening of indiening op TenderNed.
+
+### Van analyse naar calculatie
+
+Werkposten hebben een bronhoeveelheid, herkenbare raming of voorlopige aanname. Een onbekend aantal blijft leeg. AI bepaalt geen kostprijzen. Controleer de hoeveelheid en koppel zelf een catalogusartikel met dezelfde kostensoort en eenheid, of vul een eigen positieve kostprijs in. Personeel gebruikt persoonsuren. De bestaande rekenmodule verwerkt vervolgens overhead, risico, marge of opslag, korting en btw. Controleer handmatig dubbele posten uit verschillende specialistbeoordelingen.
+
+Neem de gezamenlijke offerteopzet pas over na controle. Dit vervangt scope, aanbiedingstekst, conceptontwerp en projectplan, niet de calculatie. Werk teksten daarna verder uit. De klantafdruk bevat de aanbieding, scope en documentversies plus verkoopbedragen. Interne kostprijzen blijven buiten de klantversie.
+
+Het bestekdossier gebruikt een eigen checklist voor opdrachtgegevens, beschikbare stukken, actuele specialistbeoordelingen, offerteopzet, afgehandelde bevindingen, gecontroleerde scope en financiële calculatiecontrole. De score is volledigheid van die controles, geen kans op juistheid. De bestaande technische en financiële controles blijven aanvullend verplicht. Wijzigingen trekken die controles in. Import trekt alle bevestigingen in en bewaart analyses uitsluitend als verouderde historie.
+
+### API en hosting
+
+De persoonlijke teststand op GitHub Pages ondersteunt ook deze documentanalyse. Stel je eigen sleutel en model in bij Configuratie, voer de verbindingstest uit en geef in het bestekdossier afzonderlijk toestemming voor het versturen van bestanden. De sleutel blijft alleen in het tabbladgeheugen. Er is geen extra hosting nodig voor deze persoonlijke test. Voor gedeeld gebruik bewaart de bestaande serverstand de sleutel serverzijdig.
+
+De serverroute `POST /calculator/tender` vereist een actieve sessie en schrijfrechten. De gedeelde limieten zijn 30 AI aanvragen per gebruiker en 100 per account per uur, inclusief intake en verbindingstests. De grotere documentbody wordt pas na toegangscontrole gelezen en is begrensd op 18 MB. Documenten worden niet door deze route opgeslagen. Het auditlog bevat alleen actietype en account. De Dockerbuild kopieert het gedeelde promptcontract naar de backend. Een GitHub Pages deployment publiceert alleen de frontend.
+
+De geautomatiseerde tests gebruiken fictieve tekststukken en nagebootste modelantwoorden. Een echte documentanalyse kan pas met een werkende API sleutel en passend model worden bevestigd.
+
+OpenAI bestandsinvoer, https://developers.openai.com/api/docs/guides/file-inputs.

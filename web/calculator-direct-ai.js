@@ -1,3 +1,4 @@
+import {loadTenderContract,tenderRequestBody,validateTenderResult} from './tender-ai.js';
 import {GUIDES,PREPARATION_KINDS} from './intake-guide.js';
 
 const ENDPOINT='https://api.openai.com/v1/responses';
@@ -62,15 +63,15 @@ export function createDirectAIClient(fetcher=(...args)=>fetch(...args)){
   if(typeof nextModel!=='string'||!/^[-a-zA-Z0-9_.:]{1,100}$/.test(nextModel.trim()))throw Error('Vul de modelnaam uit jouw OpenAI project in.');
   generation++;controller?.abort();controller=null;key=candidate;model=nextModel.trim();tested=false;
  }
- async function call(data){
+ async function execute(body,validate){
   if(!key)throw Error('Vul eerst jouw eigen API sleutel in bij Configuratie.');
   if(controller)throw Error('Er wordt al een AI aanvraag verwerkt.');
-  const body=directRequestBody(data,model),started=generation;controller=new AbortController();const signal=AbortSignal.any([controller.signal,AbortSignal.timeout(90000)]);
+  const started=generation;controller=new AbortController();const signal=AbortSignal.any([controller.signal,AbortSignal.timeout(90000)]);
   try{
    let response;
    try{response=await fetcher(ENDPOINT,{method:'POST',mode:'cors',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer',cache:'no-store',signal,headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:JSON.stringify(body)});}
    catch(err){if(err?.name==='AbortError'||err?.name==='TimeoutError')throw Error('De AI aanvraag is gestopt of duurde te lang. Probeer opnieuw.');throw Error('De browser bereikt OpenAI niet. Controleer jouw internetverbinding en browser- of netwerkblokkades.');}
-   const raw=await response.text();if(raw.length>250000)throw Error('Het AI antwoord is te groot. Probeer een korter bericht.');
+   const raw=await response.text();if(raw.length>600000)throw Error('Het AI antwoord is te groot. Probeer een korter bericht.');
    let value;try{value=JSON.parse(raw);}catch{throw Error('OpenAI gaf geen geldig API antwoord. Probeer later opnieuw.');}
    if(!response.ok)throw Error(providerError(response.status,value?.error?.code));
    if(!object(value)||!Array.isArray(value.output))throw Error('OpenAI gaf geen geldig API antwoord. Probeer later opnieuw.');
@@ -78,12 +79,14 @@ export function createDirectAIClient(fetcher=(...args)=>fetch(...args)){
    if(value.status!=='completed')throw Error('Het modelantwoord is niet afgerond. Probeer een korter bericht of controleer het gekozen model.');
    let output='';for(const item of value.output)if(object(item)&&item.type==='message'&&Array.isArray(item.content))for(const part of item.content){if(!object(part))continue;if(part.type==='refusal')throw Error('Het model heeft geen intakeantwoord gegeven. Formuleer jouw vraag anders.');if(part.type==='output_text')output+=part.text||'';}
    let parsed;try{parsed=JSON.parse(output);}catch{throw Error('De AI gaf geen bruikbaar intakeantwoord. Er is niets in het dossier aangepast.');}
-   return validateDirectReply(parsed);
+   return validate(parsed);
   }finally{if(started===generation)controller=null;}
  }
+ const call=async data=>{if(!key)throw Error('Vul eerst jouw eigen API sleutel in bij Configuratie.');return execute(directRequestBody(data,model),validateDirectReply);};
+ async function analyzeTender(data){if(!tested)throw Error('Test eerst jouw API verbinding bij Configuratie.');const contract=await loadTenderContract();return execute(tenderRequestBody(data,model,contract),r=>validateTenderResult(r,data.documents,data.role));}
  async function test(){
   tested=false;const result=await call({message:'Verbindingscontrole zonder klantgegevens. Geef een kort antwoord, geen dossierwijzigingen en geen voorbereidingsvoorstellen.',fields:Object.fromEntries(FIELD_IDS.map(f=>[f,{value:'',confirmed:false}])),messages:[],preparation:[],asked:''});tested=true;return {ok:true,providerTested:true};
  }
  async function chat(data){if(!tested)throw Error('Test eerst jouw API verbinding bij Configuratie.');return call(data);}
- return Object.freeze({configure,clear,status,test,chat});
+ return Object.freeze({configure,clear,status,test,chat,analyzeTender});
 }

@@ -1,3 +1,5 @@
+import {tenderChecklist,importTender} from './tender-core.js';
+import {validateTenderResult} from './tender-ai.js';
 import {GUIDES,PREPARATION_KINDS,isUncertainAnswer,preparationFor,preparationText} from './intake-guide.js';
 import {INSTALLATION_PRODUCTS} from './installation-catalog.js';
 // All amounts in the calculation result are integer euro cents.
@@ -36,14 +38,15 @@ export const CATALOG = [
 ];
 export const money = cents => new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(cents/100);
 export const id = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-export const newProject = () => ({id:id(),name:'Nieuwe installatieopdracht',created:new Date().toISOString(),updated:new Date().toISOString(),revision:1,fields:Object.fromEntries(FIELDS.map(f=>[f.id,{value:'',confirmed:false,source:''}])),messages:[],lines:[],assumptions:'',design:'',plan:'',technicalReview:false,financialReview:false,settings:{...DEFAULT_SETTINGS},asked:'trade',example:false,preparation:[],intakeFollowup:null});
+export const newProject = () => ({flow:'intake',id:id(),name:'Nieuwe installatieopdracht',created:new Date().toISOString(),updated:new Date().toISOString(),revision:1,fields:Object.fromEntries(FIELDS.map(f=>[f.id,{value:'',confirmed:false,source:''}])),messages:[],lines:[],assumptions:'',design:'',plan:'',technicalReview:false,financialReview:false,settings:{...DEFAULT_SETTINGS},asked:'trade',example:false,preparation:[],intakeFollowup:null});
 export function known(value){return typeof value==='string' && value.trim().length>1 && !isUncertainAnswer(value) && !/^(onbekend|weet ik niet|n\.?t\.?b\.?|nog niet bekend|later|te bepalen|geen idee)(?:\s|[.,;]|$)/i.test(value.trim()) && !/\b(?:dat weet ik niet|ik weet het niet|nog te bepalen)\b/i.test(value) && !/^\?+$/.test(value.trim());}
 export function completeness(p){
+  if(p.flow==='tender')return tenderChecklist(p);
   const missing=FIELDS.filter(f=>!known(p.fields[f.id]?.value)||!p.fields[f.id]?.confirmed||preparationFor(p,f.id));
   const score=100-missing.reduce((s,f)=>s+f.weight,0);
   return {score,missing,critical:missing.filter(f=>f.critical),ready:score>=95&&!missing.some(f=>f.critical)};
 }
-export function phase(p){if(FIELDS.slice(0,4).some(f=>!known(p.fields[f.id]?.value)&&!preparationFor(p,f.id)))return 'Frontoffice';if(!completeness(p).ready)return 'Accountmanager';return 'Calculator';}
+export function phase(p){if(p.flow==='tender')return 'Bestek en aanbesteding';if(FIELDS.slice(0,4).some(f=>!known(p.fields[f.id]?.value)&&!preparationFor(p,f.id)))return 'Frontoffice';if(!completeness(p).ready)return 'Accountmanager';return 'Calculator';}
 export function nextField(p){return FIELDS.find(f=>!known(p.fields[f.id]?.value)) || FIELDS.find(f=>!p.fields[f.id]?.confirmed) || null;}
 export function invalidate(p){p.technicalReview=false;p.financialReview=false;p.revision++;p.updated=new Date().toISOString();}
 export function setField(p,key,value,source='Gesprek'){
@@ -181,5 +184,6 @@ export function validateProject(p){
     return {id:id(),field:x.field,label:FIELDS.find(f=>f.id===x.field).label,kind:x.kind,note:x.note,owner:String(x.owner||'Installateur').slice(0,100),date:typeof x.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)?x.date:'',accepted:false,resolved:false,resolution:x.resolution};
    });
   }
+  if(p.flow==='tender'){clean.flow='tender';clean.tender=importTender(p.tender);for(const [role,run] of Object.entries(clean.tender.runs))if(run.result)validateTenderResult(run.result,clean.tender.documents,role);}
   clean.asked=nextIntakeField(clean)?.id||'';return clean;
 }

@@ -12,6 +12,8 @@ De productie-API staat in `backend/`. Deze werkt met SQLite, Python 3.13, SMTP e
 
 Open `calculator.html` via de link Offertewerkplaats op de website of in de werkruimte. De extra pagina bevat een gerichte klantintake, opdrachtdossier met bevestigingen, kostencatalogus, calculatie van uren en inkoop, overhead, risico, marge of opslag, korting en btw. Conceptontwerp, projectplan, offerteafdruk en projectexport werken lokaal. De volledigheidsscore van 95 procent is geen technische zekerheid. Voor een persoonlijke AI test kun je bij Configuratie jouw eigen OpenAI API sleutel en model invullen en rechtstreeks vanaf GitHub Pages testen. De sleutel blijft alleen in het tabbladgeheugen en wordt gewist bij verversen. Voor gedeeld klantgebruik is de serverstand met serverzijdige sleutel bedoeld. Er staat geen werkende sleutel in deze repository.
 
+Naast de klantintake is er een afzonderlijk bestektraject. Kies Nieuwe opdracht en vervolgens TenderNed, bestek of contract. Voeg PDF, DOCX, TXT of MD toe. Contractmanager, E-specialist, W-specialist, werkvoorbereider, calculator en offertemanager voeren afzonderlijke beoordelingen uit met instelbare aanvullende prompts. Bronverwijzingen, eisen, open vragen, werkpostvoorstellen en een gezamenlijke offerteopzet moeten handmatig worden gecontroleerd. De pagina haalt geen stukken automatisch van TenderNed op.
+
 Zie [docs/OFFERTEWERKPLAATS.md](docs/OFFERTEWERKPLAATS.md) voor gebruik, rekenregels en de grenzen van deze demo.
 
 ## Lokaal bekijken
