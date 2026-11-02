@@ -1,6 +1,8 @@
+import {PROFESSIONAL_PRODUCTS} from './professional-catalog.js';
+export const MAX_CATALOG_ITEMS=20000;
 // Generic demonstration articles. Prices are editable synthetic examples, excluding VAT.
-export const INSTALLATION_CATALOG_VERSION = "installation-300-v1";
-export const INSTALLATION_PRODUCTS = [
+export const INSTALLATION_CATALOG_VERSION = "professional-2026-11-v1";
+export const LEGACY_INSTALLATION_PRODUCTS = [
   {
     "id": "inst-el-001",
     "code": "EL-001",
@@ -3003,15 +3005,17 @@ export const INSTALLATION_PRODUCTS = [
   }
 ];
 
-export function mergeInstallationCatalog(current, limit=500) {
+export const INSTALLATION_PRODUCTS=[...LEGACY_INSTALLATION_PRODUCTS,...PROFESSIONAL_PRODUCTS];
+
+export function mergeInstallationCatalog(current, limit=MAX_CATALOG_ITEMS) {
   const existingIds=new Set(current.map(c=>c.id));
   const existingCodes=new Set(current.filter(c=>c.code).map(c=>c.code.toUpperCase()));
-  const additions=INSTALLATION_PRODUCTS.filter(c=>!existingIds.has(c.id)&&!existingCodes.has(c.code));
-  if(current.length+additions.length>limit)throw new Error(`De 300 producten passen niet binnen ${limit} catalogusregels. Exporteer je catalogus en maak eerst ruimte.`);
+  const additions=INSTALLATION_PRODUCTS.filter(c=>!existingIds.has(c.id)&&!existingCodes.has(c.code.toUpperCase()));
+  if(current.length+additions.length>limit)throw new Error(`De ${INSTALLATION_PRODUCTS.length} artikelen passen niet binnen ${limit} catalogusregels. Exporteer je catalogus en maak eerst ruimte.`);
   return [...current,...structuredClone(additions)];
 }
-export function filterCatalog(catalog, search='', group='') {
+export function filterCatalog(catalog, search='', group='', brand='', discipline='', priceType='') {
   const normalize=value=>String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const words=normalize(search).trim().split(/\s+/).filter(Boolean);
-  return catalog.filter(c=>(!group||(c.group||'Overige artikelen')===group)&&words.every(w=>normalize([c.code,c.name,c.group,c.unit].join(' ')).includes(w)));
+  return catalog.filter(c=>(!group||(c.group||'Overige artikelen')===group)&&(!brand||(c.brand||'Generiek / eigen')===brand)&&(!discipline||(c.discipline||'Algemeen')===discipline)&&(!priceType||(c.priceType||'eigen')===priceType)&&words.every(w=>normalize([c.code,c.name,c.group,c.unit,c.brand,c.manufacturerCode,c.ean,c.series,c.discipline].join(' ')).includes(w)));
 }

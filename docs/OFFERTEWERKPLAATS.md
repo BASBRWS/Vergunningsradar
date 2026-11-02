@@ -143,3 +143,22 @@ De serverroute `POST /calculator/tender` vereist een actieve sessie en schrijfre
 De geautomatiseerde tests gebruiken fictieve tekststukken en nagebootste modelantwoorden. Een echte documentanalyse kan pas met een werkende API sleutel en passend model worden bevestigd.
 
 OpenAI bestandsinvoer, https://developers.openai.com/api/docs/guides/file-inputs.
+
+
+## Uitbreiding fabrikantcatalogus, 2 november 2026
+
+De basis bevat nu 12.737 product- en materiaalartikelen. Daarvan zijn 12.437 bestaande fabrikantartikelen met herleidbare bronregels, naast de bestaande 300 generieke voorbeeldartikelen. De 11 eerdere personeels- en projectregels blijven daarnaast beschikbaar. Het totaal in een nieuwe werkruimte is daardoor 12.748 catalogusregels. Eigen artikelen kunnen dit aantal veranderen.
+
+De fabrikantselectie omvat 13 merken en 25 nieuwe productgroepen, naast de 10 eerdere generieke productgroepen. Wavin levert 5.084 geselecteerde artikelen uit het openbare PAB-bestand, inclusief merken als DYKA, Georg Fischer, Griffon, Walraven, Pipelife, Klauke, McAlpine, Martens en Plasson. Bals levert 810 artikelen voor industriële contactmaterialen. Schneider Electric levert 3.285 geselecteerde artikelen voor gebouwinstallaties. Vasco levert 2.982 radiator-, vloerwarmte- en toebehorenartikelen, 222 ventilatieartikelen en 54 warmtepomp- en toebehorenartikelen.
+
+Er zijn geen verzonnen artikelnummers, EANs of combinaties van productmaten toegevoegd. Meerdere verpakkingsvarianten uit het Wavin artikelbestand zijn gekoppeld aan één fabrikantproduct. Uitgefaseerde Wavin producten met statuscode zijn overgeslagen. Zware civiele systemen zoals Tegra, X-Stream, infiltratie en drainage zijn buiten de selectie gelaten. De Schneider selectie gebruikt bestaande gebouwinstallatiereeksen. Het bestand vermeldt zelf dat niet alle referenties erin staan. De Belgische Vasco spare parts sheet is niet als Nederlands assortiment overgenomen.
+
+De selectie is ruim voor woningbouw, utiliteit en onderhoud, maar pretendeert geen volledige dekking van alle installatiespecialismen of leveranciers. De fabrikantbestanden zijn een momentopname. Leverbaarheid, technische geschiktheid, actuele uitvoering en verpakking moeten voor bestelling bij de leverancier worden gecontroleerd.
+
+Nieuwe fabrikantartikelen hebben cost 0 en priceType missing totdat je een eigen netto inkoopprijs exclusief btw vastlegt. De bruto bronprijs is afzonderlijke metadata, wordt niet automatisch in calculaties gebruikt en geldt niet als een actuele leveranciersofferte. Controleer btw, eenheid, geldigheid en kortingsafspraken in het oorspronkelijke prijsbestand. De vrijgavecontrole blokkeert regels met nulprijzen. De bestaande generieke artikelen blijven voorbeeldprijzen gebruiken.
+
+Zoeken combineert woorden in artikelcode, fabrikantnummer, merk, EAN, serie, omschrijving, productgroep en vakgebied. Je kunt filteren op productgroep, merk, vakgebied en prijsstatus. Catalogusbeheer toont maximaal 50 regels per pagina. De calculatiekeuzelijst toont maximaal 100 zoekresultaten, verfijn bij meer resultaten de zoekopdracht. De artikelselectie bij bestekwerkposten heeft eveneens een zoekveld en een grens van 100 resultaten.
+
+De catalogusgrens is 20.000 regels. De CSV importgrens is 10 MB. De offerte houdt maximaal 500 calculatieregels. De volledige standaardcatalogus kan worden gedownload via `installatiecatalogus.csv`. De oude download `installatiematerialen-300.csv` blijft beschikbaar. Catalogus CSV exporteert de eigen actuele catalogus, inclusief fabrikantgegevens en prijsstatus. Een CSV import vervangt de huidige catalogus. Bestaande projecten en calculatieregels behouden hun eigen prijzen.
+
+Bij de automatische uitbreiding blijven bestaande eigen prijzen, artikelen en projecten bewaard. Browseropslag bevat alleen verschillen ten opzichte van de standaardcatalogus. Dit voorkomt dat de volledige fabrikantselectie de opslagruimte voor projectdossiers inneemt. Bij herladen worden standaardartikelen, eigen wijzigingen en verwijderingen samengevoegd. Het bronregister met downloadlinks, SHA-256, controledatum en aantallen staat in `catalog-sources.json`.
